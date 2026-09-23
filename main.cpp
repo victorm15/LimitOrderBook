@@ -1,14 +1,13 @@
 #include "ref_book.hpp"
+#include "array_book.hpp"
 #include "differential.hpp"
+#include "sorted_vec_book.hpp"
 
 
 
 
-void diff(const int n_seeds, const int n_events) {
-
+void diff(int n_seeds, int n_events) {
     struct Case { const char* name; ArrayBookConfig book; };
-    // Two bands. With base 0, a tick index and a price are the same number, so
-    // tick/price mix-ups are invisible. The large base makes them fail loudly.
     const Case cases[] = {
         {"base=0",      {.base_price = 0,      .band_ticks = 2000, .arena_size = 10'000}},
         {"base=999000", {.base_price = 999000, .band_ticks = 2000, .arena_size = 10'000}},
@@ -16,14 +15,13 @@ void diff(const int n_seeds, const int n_events) {
 
     for (const Case& c : cases) {
         GenConfig gc{.mid = c.book.base_price + Price(c.book.band_ticks / 2)};
-        for (int s = 0; s < n_seeds; ++s) {
-            ArrayBook fast(c.book);
-            if (!run_one(uint64_t(s), n_events, gc, fast)) {
-                std::printf("  case: %s\n", c.name);
-                return;
-            }
-        }
-        std::printf("%-12s %d seeds x %d events: OK\n", c.name, n_seeds, n_events);
+
+        if (!run_book((std::string("ArrayBook ") + c.name).c_str(),
+                      [&] { return ArrayBook(c.book); }, gc, n_seeds, n_events)) return;
+
+        if (!run_book((std::string("SortedVecBook ") + c.name).c_str(),
+                      [&] { return SortedVecBook(SortedVecBookConfig{.arena_size = 10'000}); },
+                      gc, n_seeds, n_events)) return;
     }
 }
 
@@ -50,6 +48,6 @@ void scratch_drvr() {
 
 
 int main() {
-    diff(2000,200);
+    diff(5000, 200);
     return 0;
 }

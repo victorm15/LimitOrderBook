@@ -14,6 +14,12 @@
 class ArrayBook {
 
 private:
+    struct Level {
+        Handle head = NIL, tail = NIL;
+        Quantity total_quantity = 0;
+        uint32_t total_orders = 0;
+        
+    };
     std::vector<Level> bids_;
     std::vector<Level> asks_;
     Price best_bid_;

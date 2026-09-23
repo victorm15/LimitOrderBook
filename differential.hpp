@@ -136,4 +136,18 @@ static bool run_one(uint64_t seed, int n_events, const GenConfig& gc, Fast& fast
     return true;
 }
 
+template <typename MakeBook>
+static bool run_book(const char* name, MakeBook make, const GenConfig& gc,
+                     int n_seeds, int n_events) {
+    for (int s = 0; s < n_seeds; ++s) {
+        auto fast = make();
+        if (!run_one(uint64_t(s), n_events, gc, fast)) {
+            std::printf("  book: %s\n", name);
+            return false;
+        }
+    }
+    std::printf("%-28s %d seeds x %d events: OK\n", name, n_seeds, n_events);
+    return true;
+}
+
 #endif
