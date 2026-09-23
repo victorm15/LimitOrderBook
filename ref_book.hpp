@@ -4,7 +4,7 @@
 #include "events.hpp"
 #include "sinks.hpp"
 #include "snapshot.hpp"
-#include <assert.h>
+#include <cassert>
 
 class RefBook {
 private:
@@ -60,8 +60,9 @@ public:
     void reduce(const Reduce& r) {
         for (auto it = orders_.begin(); it != orders_.end(); ++it) {
             if (it->id == r.id) {
-                assert(it->quantity > r.quantity_removed);
+                assert(it->quantity >= r.quantity_removed);
                 it->quantity -= r.quantity_removed;
+                if (it->quantity == 0) orders_.erase(it);
                 return;
             }
         }
@@ -84,11 +85,12 @@ public:
         }
     }
 
-    template <typename Sink> void replace(const Replace& r) {
+    void replace(const Replace& r) {
         for (auto it = orders_.begin(); it != orders_.end(); ++it) {
             if (it->id == r.old_id) {
-                orders_.push_back(Order{r.new_id, r.price, r.quantity, it->side});
+                Side side = it->side;
                 orders_.erase(it);
+                orders_.push_back(Order{r.new_id, r.price, r.quantity, side});
                 return;
             }
         }
@@ -125,7 +127,8 @@ public:
     }
 
     void  snapshot(Snapshot& snap) const {
-        snap = orders_;
+        snap.clear();
+        for (const Order& o : orders_) snap.push_back(SnapEntry{o.id, o.price, o.quantity, o.side});
         std::stable_sort(snap.begin(), snap.end(), [](const auto& a, const auto& b) {
             if (a.side != b.side) return a.side == Side::Buy;
             if (a.side == Side::Buy) return a.price > b.price;

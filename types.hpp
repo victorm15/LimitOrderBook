@@ -32,7 +32,7 @@ Price NO_ASK = std::numeric_limits<Price>::max();
 Handle NIL = std::numeric_limits<Handle>::max();
 
 struct Level {
-    Handle head, tail = NIL;
+    Handle head = NIL, tail = NIL;
     Quantity total_quantity = 0;
     uint32_t total_orders = 0;
 };

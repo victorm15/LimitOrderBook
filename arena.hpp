@@ -2,7 +2,7 @@
 #define ARENA_H
 
 #include "types.hpp"
-#include <assert.h>
+#include <cassert>
 
 class OrderArena {
 

@@ -5,13 +5,20 @@
 #include <iostream>
 #include "types.hpp"
 
-
-using Snapshot = std::vector<Order>;
+// Sorted by: bids, highest to lowest, then asks, lowest to highest
+struct SnapEntry {
+    OrderId id;
+    Price price;
+    Quantity quantity;
+    Side side;
+    bool operator==(const SnapEntry&) const = default;
+};
+using Snapshot = std::vector<SnapEntry>;
 
 void print_snapshot(const Snapshot& snapshot) {
     std::cout << "========================\n";
     std::cout << "Book:\n";
-    for (const Order& ord : snapshot) {
+    for (const SnapEntry& ord : snapshot) {
         std::cout << ord.id << ": " << ((ord.side == Side::Buy) ? " Buy" : "Sell") << ", Price: " 
         << ord.price << ", Quantity: " << ord.quantity << "\n";
     }            
