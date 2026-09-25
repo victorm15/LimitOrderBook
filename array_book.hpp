@@ -3,7 +3,6 @@
 
 #include "types.hpp"
 #include "arena.hpp"
-#include "book_config.hpp"
 #include "events.hpp"
 #include "sinks.hpp"
 #include "snapshot.hpp"
@@ -108,7 +107,7 @@ private:
 
 public:
 
-    ArrayBook(const ArrayBookConfig& config) 
+    ArrayBook(const BookConfig& config) 
         : bids_(config.band_ticks),
           asks_(config.band_ticks),
           best_bid_{NO_BID},
@@ -166,7 +165,6 @@ public:
 
     template <typename Sink> void execute(const Execute& e, Sink&& sink) {
         Order& resting = arena_[id_to_handle_.at(e.id)];
-        assert(e.quantity <= resting.quantity);
         sink(Fill {resting.id, resting.price, e.quantity});
         reduce_order(resting, e.quantity);
     }

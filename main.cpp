@@ -7,21 +7,25 @@
 
 
 void diff(int n_seeds, int n_events) {
-    struct Case { const char* name; ArrayBookConfig book; };
+    struct Case { const char* name; BookConfig book; };
     const Case cases[] = {
-        {"base=0",      {.base_price = 0,      .band_ticks = 2000, .arena_size = 10'000}},
-        {"base=999000", {.base_price = 999000, .band_ticks = 2000, .arena_size = 10'000}},
+        {"base=0",      {.base_price = 0,      .band_ticks = 2000,
+                         .arena_size = 10'000, .number_of_levels = 512}},
+        {"base=999000", {.base_price = 999000, .band_ticks = 2000,
+                         .arena_size = 10'000, .number_of_levels = 512}},
     };
 
     for (const Case& c : cases) {
         GenConfig gc{.mid = c.book.base_price + Price(c.book.band_ticks / 2)};
 
-        if (!run_book((std::string("ArrayBook ") + c.name).c_str(),
-                      [&] { return ArrayBook(c.book); }, gc, n_seeds, n_events)) return;
+        if (!run_book((std::string("ArrayBook ")     + c.name).c_str(),
+                      [&] { return ArrayBook(c.book); },     gc, n_seeds, n_events)) return;
 
         if (!run_book((std::string("SortedVecBook ") + c.name).c_str(),
-                      [&] { return SortedVecBook(SortedVecBookConfig{.arena_size = 10'000}); },
-                      gc, n_seeds, n_events)) return;
+                      [&] { return SortedVecBook(c.book); }, gc, n_seeds, n_events)) return;
+
+        if (!run_book((std::string("HashBook ")      + c.name).c_str(),
+                      [&] { return HashBook(c.book); },      gc, n_seeds, n_events)) return;
     }
 }
 
@@ -48,6 +52,6 @@ void scratch_drvr() {
 
 
 int main() {
-    diff(5000, 200);
+    diff(500, 500);
     return 0;
 }

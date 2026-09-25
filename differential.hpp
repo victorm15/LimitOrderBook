@@ -13,6 +13,8 @@
 #include "ref_book.hpp"
 #include "array_book.hpp"
 #include "generator.hpp"
+#include "sorted_vec_book.hpp"
+#include "hash_book.hpp"
 
 #include <algorithm>
 #include <cstdio>

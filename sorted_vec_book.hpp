@@ -6,7 +6,6 @@
 #include "snapshot.hpp"
 #include "sinks.hpp"
 #include "arena.hpp"
-#include "book_config.hpp"
 #include <vector>
 #include <unordered_map>
 #include <cassert>
@@ -135,10 +134,10 @@ private:
 
 public:
 
-    SortedVecBook(const SortedVecBookConfig& config) :
+    SortedVecBook(const BookConfig& config) :
     arena_{config.arena_size}{
-        bids_.reserve(1024);
-        asks_.reserve(1024);
+        bids_.reserve(config.number_of_levels);
+        asks_.reserve(config.number_of_levels);
         id_to_handle_.reserve(config.arena_size);
     }
 

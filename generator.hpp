@@ -1,3 +1,6 @@
+#ifndef GENERATOR_H
+#define GENERATOR_H
+
 #pragma once
 #include "types.hpp"
 #include "events.hpp"
@@ -105,3 +108,5 @@ inline void print_event(std::ostream& os, const Event& e) {
         else if constexpr (std::is_same_v<T, Replace>) os << "REPLACE old=" << ev.old_id << " new=" << ev.new_id << " px=" << ev.price << " q=" << ev.quantity;
     }, e);
 }
+
+#endif

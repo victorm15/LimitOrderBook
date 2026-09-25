@@ -27,6 +27,13 @@ struct Fill {
     bool operator==(const Fill&) const = default;
 };
 
+struct BookConfig {
+    Price base_price = 0;
+    Price band_ticks = 2000;
+    size_t arena_size = 10000;
+    size_t number_of_levels = 1024;
+};
+
 Price NO_BID = std::numeric_limits<Price>::min();
 Price NO_ASK = std::numeric_limits<Price>::max();
 Handle NIL = std::numeric_limits<Handle>::max();
