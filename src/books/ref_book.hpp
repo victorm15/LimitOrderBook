@@ -1,9 +1,9 @@
 #ifndef REF_BOOK_H
 #define REF_BOOK_H
 
-#include "events.hpp"
-#include "sinks.hpp"
-#include "snapshot.hpp"
+#include "../core/events.hpp"
+#include "../core/sinks.hpp"
+#include "../core/snapshot.hpp"
 #include <cassert>
 
 class RefBook {

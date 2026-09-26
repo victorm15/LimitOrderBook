@@ -1,19 +1,16 @@
-#ifndef HASH_BOOK_H
-#define HASH_BOOK_H
+#ifndef ARRAY_BOOK_H
+#define ARRAY_BOOK_H
 
-#include "types.hpp"
-#include "events.hpp"
-#include "sinks.hpp"
-#include "arena.hpp"
-#include "snapshot.hpp"
+#include "../core/types.hpp"
+#include "../core/arena.hpp"
+#include "../core/events.hpp"
+#include "../core/sinks.hpp"
+#include "../core/snapshot.hpp"
+#include <unordered_map>
 #include <vector>
 #include <cassert>
-#include <unordered_map>
-#include <algorithm>
 
-
-
-class HashBook {
+class ArrayBook {
 
 private:
     struct Level {
@@ -22,10 +19,13 @@ private:
         uint32_t total_orders = 0;
         
     };
-    std::unordered_map<Price, Level> bids_, asks_;
-    mutable std::vector<Price> bid_heap_, ask_heap_;
-    std::unordered_map<OrderId, Handle> id_to_handle_;
+    std::vector<Level> bids_;
+    std::vector<Level> asks_;
+    Price best_bid_;
+    Price best_ask_;
     OrderArena arena_;
+    Price base_price_;
+    std::unordered_map<OrderId, Handle> id_to_handle_;
 
     void push_back(Level& lvl, Handle h) {
         Order& o = arena_[h];
@@ -60,15 +60,34 @@ private:
         lvl.total_quantity -= o.quantity;
     }
 
-    Level& level_of(Side side, Price price) {
-        std::unordered_map<Price, Level>& map = (side == Side::Buy) ? bids_ : asks_;
-        assert(map.contains(price));
-        return map.at(price);
+    void update_best_bid(Price prev_best) {
+        for (Price p = prev_best; p >= base_price_; --p) {
+            if (bids_[p - base_price_].head != NIL) {
+                best_bid_ = p;
+                return;
+            }
+        }
+        best_bid_ = NO_BID;
+    }
+    
+    void update_best_ask(Price prev_best) {
+        for (size_t t = size_t(prev_best - base_price_); t < asks_.size(); ++t) {
+            if (asks_[t].head != NIL) {
+                best_ask_ = Price(t) + base_price_;
+                return;
+            }
+        }
+        best_ask_ = NO_ASK;
     }
 
-    const Level& level_of(Side side, Price price) const {
-        const std::unordered_map<Price, Level>& map = (side == Side::Buy) ? bids_ : asks_;
-        return map.at(price);
+    Level& level_of(Side side, Price price) { 
+        assert(price >= base_price_ && price - base_price_ < Price(bids_.size()));
+        return (side == Side::Buy) ? (bids_[price - base_price_]) : (asks_[price - base_price_]); 
+    }
+    
+    const Level& level_of(Side side, Price price) const { 
+        assert(price >= base_price_ && price - base_price_ < Price(bids_.size()));
+        return (side == Side::Buy) ? (bids_[price - base_price_]) : (asks_[price - base_price_]); 
     }
 
     void reduce_order(Order& o, Quantity quantity_removed) {
@@ -76,11 +95,8 @@ private:
         if (o.quantity == quantity_removed) {
             Handle h = id_to_handle_.at(o.id);
             id_to_handle_.erase(o.id);
-            Level& lvl = level_of(o.side, o.price);
-            unlink(lvl, h);
-            if (lvl.total_orders == 0) {
-                if (o.side == Side::Buy) bids_.erase(o.price); else asks_.erase(o.price);
-            }
+            unlink(level_of(o.side, o.price), h);
+            if (o.side == Side::Buy) update_best_bid(best_bid_); else update_best_ask(best_ask_);
             arena_.release(h);
         }
         else {
@@ -89,45 +105,27 @@ private:
         }
     }
 
-    void insert_order(Order& o, Handle h) {
-        bool is_buy = o.side == Side::Buy;
-        std::unordered_map<Price, Level>& map = is_buy ? bids_ : asks_;
-        if (!map.contains(o.price)) {
-            map.insert({o.price, Level{}});
-            if (is_buy) {
-                bid_heap_.push_back(o.price);
-                std::push_heap(bid_heap_.begin(), bid_heap_.end());
-            }
-            else {
-                ask_heap_.push_back(o.price);
-                std::push_heap(ask_heap_.begin(), ask_heap_.end(), std::greater<Price>{});
-            }
-        }
-        push_back(level_of(o.side, o.price), h);
-    }
-
 public:
 
-    HashBook(const BookConfig& config) :
-    arena_{config.arena_size}{
-        bids_.reserve(config.number_of_levels);
-        asks_.reserve(config.number_of_levels);
-        bid_heap_.reserve(config.band_ticks);
-        ask_heap_.reserve(config.band_ticks);
-        id_to_handle_.reserve(config.arena_size);
-    }
+    ArrayBook(const BookConfig& config) 
+        : bids_(config.band_ticks),
+          asks_(config.band_ticks),
+          best_bid_{NO_BID},
+          best_ask_{NO_ASK},
+          arena_{config.arena_size},
+          base_price_{config.base_price}
+    {id_to_handle_.reserve(config.arena_size);}
 
     template <typename Sink> void add(const Add& a, Sink&& sink) {
         Quantity quantity_left = a.quantity;
         bool is_buy = a.side == Side::Buy;
         while (quantity_left > 0) {
 
-            Price best_price = is_buy ? best_ask() : best_bid();
-            if (is_buy ? best_price > a.price : best_price < a.price) break;
+            if (is_buy ? best_ask_ > a.price : best_bid_ < a.price) break;
 
             Order& resting = arena_[level_of(
-                (is_buy ? Side::Sell : Side::Buy), 
-                (best_price))
+                (is_buy) ? Side::Sell : Side::Buy, 
+                (is_buy ? best_ask_ : best_bid_))
                 .head];
 
             if (resting.quantity > quantity_left) {
@@ -150,33 +148,34 @@ public:
             incoming.price = a.price;
             incoming.quantity = quantity_left;
             incoming.side = a.side;
-            insert_order(incoming, incoming_handle);
+            push_back(level_of(a.side, a.price), incoming_handle);
+            if (is_buy && best_bid_ < a.price) best_bid_ = a.price;
+            else if (!is_buy && best_ask_ > a.price) best_ask_ = a.price;
         }
     }
-
+    
     void cancel(const Cancel& c) {
         Order& o = arena_[id_to_handle_.at(c.id)];
         reduce_order(o, o.quantity);
     }
-
-    void reduce(const Reduce& r) {
+    
+    void reduce(const Reduce& r) { 
         reduce_order(arena_[id_to_handle_.at(r.id)], r.quantity_removed);
     }
 
     template <typename Sink> void execute(const Execute& e, Sink&& sink) {
-        Order& o = arena_[id_to_handle_.at(e.id)];
-        sink(Fill {e.id, o.price, e.quantity});
-        reduce_order(o, e.quantity);
+        Order& resting = arena_[id_to_handle_.at(e.id)];
+        sink(Fill {resting.id, resting.price, e.quantity});
+        reduce_order(resting, e.quantity);
     }
-
+    
     void replace(const Replace& r) {
         Handle h = id_to_handle_.at(r.old_id);
         Order& o = arena_[h];
         Level& old_lvl = level_of(o.side, o.price);
         unlink(old_lvl, h);
-        if (old_lvl.total_orders == 0) {
-                if (o.side == Side::Buy) bids_.erase(o.price); else asks_.erase(o.price);
-        }
+        bool is_buy = o.side == Side::Buy;
+        bool was_best_price = is_buy ? o.price == best_bid_ : o.price == best_ask_;
 
         o.price = r.price;
         o.quantity = r.quantity;
@@ -184,60 +183,38 @@ public:
         id_to_handle_.erase(r.old_id);
         assert(!id_to_handle_.contains(r.new_id));
         id_to_handle_[r.new_id] = h;
-        insert_order(o, h);
-    }
+        push_back(level_of(o.side, o.price), h);
 
-    Price best_bid() const {
-        if (bid_heap_.empty()) return NO_BID;
-        while (!bid_heap_.empty()) {
-            if (bids_.contains(bid_heap_.front())) {
-                return bid_heap_.front();
-            }
-            std::pop_heap(bid_heap_.begin(), bid_heap_.end());
-            bid_heap_.pop_back();
+        if (is_buy) {
+            if (o.price >= best_bid_) best_bid_ = o.price;
+            else if (was_best_price) update_best_bid(best_bid_);
         }
-        return NO_BID;
-    }
-
-    Price best_ask() const {
-        if (ask_heap_.empty()) return NO_ASK;
-        while (!ask_heap_.empty()) {
-            if (asks_.contains(ask_heap_.front())) {
-                return ask_heap_.front();
-            }
-            std::pop_heap(ask_heap_.begin(), ask_heap_.end(), std::greater<Price>{});
-            ask_heap_.pop_back();
+        else {
+            if (o.price <= best_ask_) best_ask_ = o.price;
+            else if (was_best_price) update_best_ask(best_ask_);
         }
-        return NO_ASK;
     }
-
-    Quantity   quantity_at(Side side, Price price) const {
-        return (side == Side::Buy ? bids_.contains(price) 
-        : asks_.contains(price)) ? level_of(side, price).total_quantity : 0;
+    
+    Price best_bid() const { return best_bid_; }
+    
+    Price best_ask() const { return best_ask_; }
+    
+    Quantity   quantity_at(Side side, Price price) const { 
+        assert(price >= base_price_ && price - base_price_ < Price(bids_.size()));
+        return level_of(side, price).total_quantity;
     }
 
     void  snapshot(Snapshot& snap) const {
         snap.clear();
-
-        std::vector<Price> sorted_bid_prices;
-        sorted_bid_prices.reserve(bids_.size());
-        for (const auto& bid : bids_) sorted_bid_prices.push_back(bid.first);
-        std::sort(sorted_bid_prices.begin(), sorted_bid_prices.end(), std::greater<Price>{});
-
-        std::vector<Price> sorted_ask_prices;
-        sorted_ask_prices.reserve(asks_.size());
-        for (const auto& ask : asks_) sorted_ask_prices.push_back(ask.first);
-        std::sort(sorted_ask_prices.begin(), sorted_ask_prices.end());
-
-        for (Price p : sorted_bid_prices) {
+        for (Price p = Price(bids_.size()-1) + base_price_; p >= base_price_; --p) {
             Handle order_handle = level_of(Side::Buy, p).head;
             while (order_handle != NIL) {
                 const Order& o = arena_[order_handle];
                 snap.push_back(SnapEntry{o.id, o.price, o.quantity, Side::Buy});
                 order_handle = o.next;
             }
-        } 
-        for (Price p : sorted_ask_prices) {
+        }
+        for (Price p = base_price_; p < Price(asks_.size() + base_price_); ++p) {
             Handle order_handle = level_of(Side::Sell, p).head;
             while (order_handle != NIL) {
                 const Order& o = arena_[order_handle];
@@ -245,9 +222,9 @@ public:
                 order_handle = o.next;
             }
         }
-
     }
 
 };
+
 
 #endif

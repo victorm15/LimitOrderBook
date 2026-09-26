@@ -1,11 +1,11 @@
 #ifndef SORTED_VEC_BOOK_H
 #define SORTED_VEC_BOOK_H
 
-#include "types.hpp"
-#include "events.hpp"
-#include "snapshot.hpp"
-#include "sinks.hpp"
-#include "arena.hpp"
+#include "../core/types.hpp"
+#include "../core/events.hpp"
+#include "../core/snapshot.hpp"
+#include "../core/sinks.hpp"
+#include "../core/arena.hpp"
 #include <vector>
 #include <unordered_map>
 #include <cassert>

@@ -2,9 +2,9 @@
 #define GENERATOR_H
 
 #pragma once
-#include "types.hpp"
-#include "events.hpp"
-#include "snapshot.hpp"
+#include "../core/types.hpp"
+#include "../core/events.hpp"
+#include "../core/snapshot.hpp"
 #include <random>
 #include <ostream>
 #include <variant>

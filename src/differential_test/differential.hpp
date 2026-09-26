@@ -10,11 +10,12 @@
 //   start short (e.g. 2000 20) so failures come with short, readable histories,
 //   then go longer (e.g. 1000 5000) once short streams pass.
 
-#include "ref_book.hpp"
-#include "array_book.hpp"
+#include "../books/ref_book.hpp"
+#include "../books/array_book.hpp"
+#include "../books/sorted_vec_book.hpp"
+#include "../books/hash_book.hpp"
+#include "../books/bitmap_book.hpp"
 #include "generator.hpp"
-#include "sorted_vec_book.hpp"
-#include "hash_book.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -150,6 +151,32 @@ static bool run_book(const char* name, MakeBook make, const GenConfig& gc,
     }
     std::printf("%-28s %d seeds x %d events: OK\n", name, n_seeds, n_events);
     return true;
+}
+
+
+void diff(int n_seeds, int n_events) {
+    struct Case { const char* name; BookConfig book; };
+    const Case cases[] = {
+        {"base=0",      {.base_price = 0,      .band_ticks = 2000,
+                         .arena_size = 10'000, .number_of_levels = 512}},
+        {"base=999000", {.base_price = 999000, .band_ticks = 2000,
+                         .arena_size = 10'000, .number_of_levels = 512}},
+    };
+
+    for (const Case& c : cases) {
+        GenConfig gc{.mid = c.book.base_price + Price(c.book.band_ticks / 2)};
+
+        if (!run_book((std::string("ArrayBook ")     + c.name).c_str(),
+                      [&] { return ArrayBook(c.book); },     gc, n_seeds, n_events)) return;
+
+        if (!run_book((std::string("SortedVecBook ") + c.name).c_str(),
+                      [&] { return SortedVecBook(c.book); }, gc, n_seeds, n_events)) return;
+
+        if (!run_book((std::string("HashBook ")      + c.name).c_str(),
+                      [&] { return HashBook(c.book); },      gc, n_seeds, n_events)) return;
+        if (!run_book((std::string("BitmapBook ")      + c.name).c_str(),
+                      [&] { return BitmapBook(c.book); },    gc, n_seeds, n_events)) return;
+    }
 }
 
 #endif

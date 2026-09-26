@@ -1,16 +1,18 @@
-#ifndef ARRAY_BOOK_H
-#define ARRAY_BOOK_H
+#ifndef BITMAPBOOK_H
+#define BITMAPBOOK_H
 
-#include "types.hpp"
-#include "arena.hpp"
-#include "events.hpp"
-#include "sinks.hpp"
-#include "snapshot.hpp"
+#include "../core/types.hpp"
+#include "../core/arena.hpp"
+#include "../core/events.hpp"
+#include "../core/sinks.hpp"
+#include "../core/snapshot.hpp"
 #include <unordered_map>
 #include <vector>
 #include <cassert>
+#include <cmath>
+#include <bit>
 
-class ArrayBook {
+class BitmapBook {
 
 private:
     struct Level {
@@ -19,8 +21,8 @@ private:
         uint32_t total_orders = 0;
         
     };
-    std::vector<Level> bids_;
-    std::vector<Level> asks_;
+    std::vector<Level> bids_, asks_;
+    std::vector<uint64_t> bids_bitmap_, asks_bitmap_;
     Price best_bid_;
     Price best_ask_;
     OrderArena arena_;
@@ -61,9 +63,10 @@ private:
     }
 
     void update_best_bid(Price prev_best) {
-        for (Price p = prev_best; p >= base_price_; --p) {
-            if (bids_[p - base_price_].head != NIL) {
-                best_bid_ = p;
+        size_t word = word_of(prev_best);
+        for (size_t t = word+1; t-- > 0;) {
+            if (bids_bitmap_[t]) {
+                best_bid_ = t*64 + 63-std::countl_zero(bids_bitmap_[t]) + base_price_;
                 return;
             }
         }
@@ -71,9 +74,10 @@ private:
     }
     
     void update_best_ask(Price prev_best) {
-        for (size_t t = size_t(prev_best - base_price_); t < asks_.size(); ++t) {
-            if (asks_[t].head != NIL) {
-                best_ask_ = Price(t) + base_price_;
+        size_t word = word_of(prev_best);
+        for (size_t t = word; t < asks_bitmap_.size(); ++t) {
+            if (asks_bitmap_[t]) {
+                best_ask_ = t*64 + std::countr_zero(asks_bitmap_[t]) + base_price_;
                 return;
             }
         }
@@ -90,13 +94,34 @@ private:
         return (side == Side::Buy) ? (bids_[price - base_price_]) : (asks_[price - base_price_]); 
     }
 
+    constexpr size_t word_of(Price p) const { return (p-base_price_) >> 6; }
+
+    void clear_bit(Side side, Price p) {
+        size_t word = (p - base_price_) >> 6;
+        int bit = (p - base_price_) & 63;
+        if (side == Side::Buy) bids_bitmap_[word] &= ~(1ULL << bit);
+        else asks_bitmap_[word] &= ~(1ULL << bit);
+    }
+    
+    void set_bit(Side side, Price p) {
+        size_t word = (p - base_price_) >> 6;
+        int bit = (p - base_price_) & 63;
+        if (side == Side::Buy) bids_bitmap_[word] |= 1ULL << bit;
+        else asks_bitmap_[word] |= 1ULL << bit;
+    }
+
     void reduce_order(Order& o, Quantity quantity_removed) {
         assert(quantity_removed <= o.quantity);
         if (o.quantity == quantity_removed) {
             Handle h = id_to_handle_.at(o.id);
             id_to_handle_.erase(o.id);
-            unlink(level_of(o.side, o.price), h);
-            if (o.side == Side::Buy) update_best_bid(best_bid_); else update_best_ask(best_ask_);
+            Level& lvl = level_of(o.side, o.price);
+            unlink(lvl, h);
+            if (lvl.total_orders == 0) {
+                clear_bit(o.side, o.price);
+                if (o.side == Side::Buy && o.price == best_bid_) update_best_bid(best_bid_); 
+                else if (!(o.side == Side::Buy) && o.price == best_ask_) update_best_ask(best_ask_);
+            }
             arena_.release(h);
         }
         else {
@@ -107,9 +132,11 @@ private:
 
 public:
 
-    ArrayBook(const BookConfig& config) 
+    BitmapBook(const BookConfig& config) 
         : bids_(config.band_ticks),
           asks_(config.band_ticks),
+          bids_bitmap_((config.band_ticks + 63) / 64),
+          asks_bitmap_((config.band_ticks + 63) / 64),
           best_bid_{NO_BID},
           best_ask_{NO_ASK},
           arena_{config.arena_size},
@@ -120,11 +147,10 @@ public:
         Quantity quantity_left = a.quantity;
         bool is_buy = a.side == Side::Buy;
         while (quantity_left > 0) {
-
             if (is_buy ? best_ask_ > a.price : best_bid_ < a.price) break;
 
             Order& resting = arena_[level_of(
-                (is_buy) ? Side::Sell : Side::Buy, 
+                (is_buy ? Side::Sell : Side::Buy), 
                 (is_buy ? best_ask_ : best_bid_))
                 .head];
 
@@ -148,7 +174,9 @@ public:
             incoming.price = a.price;
             incoming.quantity = quantity_left;
             incoming.side = a.side;
-            push_back(level_of(a.side, a.price), incoming_handle);
+            Level& new_lvl = level_of(incoming.side, incoming.price);
+            if (new_lvl.total_orders == 0) set_bit(incoming.side, incoming.price);
+            push_back(new_lvl, incoming_handle);
             if (is_buy && best_bid_ < a.price) best_bid_ = a.price;
             else if (!is_buy && best_ask_ > a.price) best_ask_ = a.price;
         }
@@ -174,6 +202,9 @@ public:
         Order& o = arena_[h];
         Level& old_lvl = level_of(o.side, o.price);
         unlink(old_lvl, h);
+        if (old_lvl.total_orders == 0) clear_bit(o.side, o.price);
+        bool is_buy = o.side == Side::Buy;
+        bool was_best_price = is_buy ? o.price == best_bid_ : o.price == best_ask_;
 
         o.price = r.price;
         o.quantity = r.quantity;
@@ -181,15 +212,17 @@ public:
         id_to_handle_.erase(r.old_id);
         assert(!id_to_handle_.contains(r.new_id));
         id_to_handle_[r.new_id] = h;
-        push_back(level_of(o.side, o.price), h);
+        Level& new_lvl = level_of(o.side, o.price);
+        if (new_lvl.total_orders == 0) set_bit(o.side, o.price);
+        push_back(new_lvl, h);
 
-        if (o.side == Side::Buy) {
+        if (is_buy) {
             if (o.price >= best_bid_) best_bid_ = o.price;
-            else update_best_bid(best_bid_);
+            else if (was_best_price) update_best_bid(best_bid_);
         }
         else {
             if (o.price <= best_ask_) best_ask_ = o.price;
-            else update_best_ask(best_ask_);
+            else if (was_best_price) update_best_ask(best_ask_);
         }
     }
     
