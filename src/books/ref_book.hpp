@@ -5,6 +5,9 @@
 #include "../core/sinks.hpp"
 #include "../core/snapshot.hpp"
 #include <cassert>
+#include <numeric>
+#include <optional>
+#include <random>
 
 class RefBook {
 private:
@@ -85,12 +88,12 @@ public:
         }
     }
 
-    void replace(const Replace& r) {
+    template <typename Sink> void replace(const Replace& r, Sink&& sink) {
         for (auto it = orders_.begin(); it != orders_.end(); ++it) {
             if (it->id == r.old_id) {
                 Side side = it->side;
                 orders_.erase(it);
-                orders_.push_back(Order{r.new_id, r.price, r.quantity, side});
+                add(Add{.id = r.new_id, .price = r.price, .quantity = r.quantity, .side = side}, sink);
                 return;
             }
         }
@@ -126,7 +129,7 @@ public:
         return sum;
     }
 
-    void  snapshot(Snapshot& snap) const {
+    void snapshot(Snapshot& snap) const {
         snap.clear();
         for (const Order& o : orders_) snap.push_back(SnapEntry{o.id, o.price, o.quantity, o.side});
         std::stable_sort(snap.begin(), snap.end(), [](const auto& a, const auto& b) {
@@ -134,6 +137,26 @@ public:
             if (a.side == Side::Buy) return a.price > b.price;
             return a.price < b.price;
         });
+    }
+
+    const Order* nearest_order(Side s, Price price, std::mt19937& rng) const {
+        Price best_dist = std::numeric_limits<Price>::max();
+        const Order* chosen = nullptr;
+        int n_tied = 0;
+        for (const Order& o : orders_) {
+            if (o.side != s) continue;
+            Price dist = std::abs(price - o.price);
+            if (dist < best_dist) {
+                best_dist = dist;
+                chosen = &o;
+                n_tied = 1;
+            }
+            else if (dist == best_dist) {
+                ++n_tied;
+                if (std::uniform_int_distribution<int>(1, n_tied)(rng) == 1) chosen = &o;
+            }
+        }
+        return chosen;
     }
 
 };

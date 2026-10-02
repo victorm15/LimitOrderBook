@@ -5,7 +5,7 @@
 #include <vector>
 
 struct NullSink {
-    void operator()(const Fill& trade) const noexcept {}
+    void operator()(const Fill&) const noexcept {}
 };
 
 struct VecSink {

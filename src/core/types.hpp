@@ -8,7 +8,9 @@ using Price = std::int32_t;
 using Quantity = std::uint32_t;
 using OrderId = std::uint64_t;
 using Handle = std::uint32_t;
-
+Handle NIL = std::numeric_limits<Handle>::max();
+Price NO_BID = std::numeric_limits<Price>::min();
+Price NO_ASK = std::numeric_limits<Price>::max();
 enum class Side : uint8_t { Buy, Sell };
 
 struct Order {
@@ -16,7 +18,7 @@ struct Order {
     Price price;
     Quantity quantity;
     Side side;
-    Handle prev, next;
+    Handle prev = NIL, next = NIL;
     bool operator==(const Order&) const = default;
 };
 
@@ -34,9 +36,8 @@ struct BookConfig {
     size_t number_of_levels = 1024;
 };
 
-Price NO_BID = std::numeric_limits<Price>::min();
-Price NO_ASK = std::numeric_limits<Price>::max();
-Handle NIL = std::numeric_limits<Handle>::max();
+
+
 
 
 

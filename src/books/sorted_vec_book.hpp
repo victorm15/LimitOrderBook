@@ -198,25 +198,31 @@ public:
         reduce_order(lvl_idx, o, e.quantity);
     }
 
-    void replace(const Replace& r) {
-        Handle h = id_to_handle_.at(r.old_id);
-        Order& o = arena_[h];
-        size_t old_lvl_idx = index_at_price(o.side, o.price);
-        assert(old_lvl_idx != NOT_FOUND);
-        Level& old_lvl = get_level(o.side, old_lvl_idx);
-        unlink(old_lvl, h);
-        if (old_lvl.total_orders == 0) {
-            if (o.side == Side::Buy) bids_.erase(bids_.begin() + old_lvl_idx);
-            else asks_.erase(asks_.begin() + old_lvl_idx);
-        }
+    // void replace(const Replace& r) {
+    //     Handle h = id_to_handle_.at(r.old_id);
+    //     Order& o = arena_[h];
+    //     size_t old_lvl_idx = index_at_price(o.side, o.price);
+    //     assert(old_lvl_idx != NOT_FOUND);
+    //     Level& old_lvl = get_level(o.side, old_lvl_idx);
+    //     unlink(old_lvl, h);
+    //     if (old_lvl.total_orders == 0) {
+    //         if (o.side == Side::Buy) bids_.erase(bids_.begin() + old_lvl_idx);
+    //         else asks_.erase(asks_.begin() + old_lvl_idx);
+    //     }
 
-        o.price = r.price;
-        o.quantity = r.quantity;
-        o.id = r.new_id;
-        id_to_handle_.erase(r.old_id);
-        assert(!id_to_handle_.contains(r.new_id));
-        id_to_handle_[r.new_id] = h;
-        insert_order(o, h);
+    //     o.price = r.price;
+    //     o.quantity = r.quantity;
+    //     o.id = r.new_id;
+    //     id_to_handle_.erase(r.old_id);
+    //     assert(!id_to_handle_.contains(r.new_id));
+    //     id_to_handle_[r.new_id] = h;
+    //     insert_order(o, h);
+    // }
+
+    template <typename Sink> void replace(const Replace& r, Sink&& sink) {
+        Side side = arena_[id_to_handle_.at(r.old_id)].side;
+        cancel(Cancel{.id = r.old_id});
+        add(Add{.id = r.new_id, .price = r.price, .quantity = r.quantity, .side = side}, sink);
     }
 
     Price best_bid() const { 

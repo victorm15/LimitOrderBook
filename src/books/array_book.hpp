@@ -169,30 +169,36 @@ public:
         reduce_order(resting, e.quantity);
     }
     
-    void replace(const Replace& r) {
-        Handle h = id_to_handle_.at(r.old_id);
-        Order& o = arena_[h];
-        Level& old_lvl = level_of(o.side, o.price);
-        unlink(old_lvl, h);
-        bool is_buy = o.side == Side::Buy;
-        bool was_best_price = is_buy ? o.price == best_bid_ : o.price == best_ask_;
 
-        o.price = r.price;
-        o.quantity = r.quantity;
-        o.id = r.new_id;
-        id_to_handle_.erase(r.old_id);
-        assert(!id_to_handle_.contains(r.new_id));
-        id_to_handle_[r.new_id] = h;
-        push_back(level_of(o.side, o.price), h);
 
-        if (is_buy) {
-            if (o.price >= best_bid_) best_bid_ = o.price;
-            else if (was_best_price) update_best_bid(best_bid_);
-        }
-        else {
-            if (o.price <= best_ask_) best_ask_ = o.price;
-            else if (was_best_price) update_best_ask(best_ask_);
-        }
+    // Handle h = id_to_handle_.at(r.old_id);
+    // Order& o = arena_[h];
+    // Level& old_lvl = level_of(o.side, o.price);
+    // unlink(old_lvl, h);
+    // bool is_buy = o.side == Side::Buy;
+    // bool was_best_price = is_buy ? o.price == best_bid_ : o.price == best_ask_;
+
+    // o.price = r.price;
+    // o.quantity = r.quantity;
+    // o.id = r.new_id;
+    // id_to_handle_.erase(r.old_id);
+    // assert(!id_to_handle_.contains(r.new_id));
+    // id_to_handle_[r.new_id] = h;
+    // push_back(level_of(o.side, o.price), h);
+
+    // if (is_buy) {
+    //     if (o.price >= best_bid_) best_bid_ = o.price;
+    //     else if (was_best_price) update_best_bid(best_bid_);
+    // }
+    // else {
+    //     if (o.price <= best_ask_) best_ask_ = o.price;
+    //     else if (was_best_price) update_best_ask(best_ask_);
+    // }
+
+    template <typename Sink> void replace(const Replace& r, Sink&& sink) {
+        Side side = arena_[id_to_handle_.at(r.old_id)].side;
+        cancel(Cancel{.id = r.old_id});
+        add(Add{.id = r.new_id, .price = r.price, .quantity = r.quantity, .side = side}, sink);
     }
     
     Price best_bid() const { return best_bid_; }

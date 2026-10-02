@@ -92,7 +92,7 @@ void apply(Book& book, const Event& e, Sink& sink) {
         else if constexpr (std::is_same_v<T, Execute>) book.execute(ev, sink);
         else if constexpr (std::is_same_v<T, Cancel>)  book.cancel(ev);
         else if constexpr (std::is_same_v<T, Reduce>)  book.reduce(ev);
-        else if constexpr (std::is_same_v<T, Replace>) book.replace(ev);
+        else if constexpr (std::is_same_v<T, Replace>) book.replace(ev, sink);
     }, e);
 }
 

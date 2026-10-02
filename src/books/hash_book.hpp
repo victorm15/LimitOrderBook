@@ -169,22 +169,28 @@ public:
         reduce_order(o, e.quantity);
     }
 
-    void replace(const Replace& r) {
-        Handle h = id_to_handle_.at(r.old_id);
-        Order& o = arena_[h];
-        Level& old_lvl = level_of(o.side, o.price);
-        unlink(old_lvl, h);
-        if (old_lvl.total_orders == 0) {
-                if (o.side == Side::Buy) bids_.erase(o.price); else asks_.erase(o.price);
-        }
+    // void replace(const Replace& r) {
+    //     Handle h = id_to_handle_.at(r.old_id);
+    //     Order& o = arena_[h];
+    //     Level& old_lvl = level_of(o.side, o.price);
+    //     unlink(old_lvl, h);
+    //     if (old_lvl.total_orders == 0) {
+    //             if (o.side == Side::Buy) bids_.erase(o.price); else asks_.erase(o.price);
+    //     }
 
-        o.price = r.price;
-        o.quantity = r.quantity;
-        o.id = r.new_id;
-        id_to_handle_.erase(r.old_id);
-        assert(!id_to_handle_.contains(r.new_id));
-        id_to_handle_[r.new_id] = h;
-        insert_order(o, h);
+    //     o.price = r.price;
+    //     o.quantity = r.quantity;
+    //     o.id = r.new_id;
+    //     id_to_handle_.erase(r.old_id);
+    //     assert(!id_to_handle_.contains(r.new_id));
+    //     id_to_handle_[r.new_id] = h;
+    //     insert_order(o, h);
+    // }
+
+    template <typename Sink> void replace(const Replace& r, Sink&& sink) {
+        Side side = arena_[id_to_handle_.at(r.old_id)].side;
+        cancel(Cancel{.id = r.old_id});
+        add(Add{.id = r.new_id, .price = r.price, .quantity = r.quantity, .side = side}, sink);
     }
 
     Price best_bid() const {
