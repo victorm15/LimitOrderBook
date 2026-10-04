@@ -1,0 +1,25 @@
+{
+  "config": {
+    "seed": 12345,
+    "n_events": 1000000,
+    "p_add": 52,
+    "p_cancel": 46,
+    "p_reduce": 2,
+    "add_dist_lambda": 0,
+    "cancel_dist_lambda": 0,
+    "dist_scale_factor": 1,
+    "occupied_level_range": 0
+  },
+  "measured": {
+    "level_creations": 88834,
+    "level_deletions": 88799,
+    "fills_per_add": 0.0959145,
+    "median_gap": 1,
+    "median_occupied_levels": 16,
+    "median_creation_dist": 7,
+    "median_destruction_dist": 8,
+    "max_live_orders": 10276,
+    "lowest_price": 21930,
+    "highest_price": 22045
+  }
+}

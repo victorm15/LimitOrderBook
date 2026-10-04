@@ -5,14 +5,16 @@
 #include <unordered_map>
 #include <cassert>
 #include <cmath>
-#include "types.hpp"
-#include "events.hpp"
-#include "ref_book.hpp"
-#include "sinks.hpp"
+#include "../core/types.hpp"
+#include "../core/events.hpp"
+#include "../books/ref_book.hpp"
+#include "../core/sinks.hpp"
 
 
 
-class FlowGenerator {
+
+
+class StreamGenerator {
 
 private:
 
@@ -47,9 +49,9 @@ private:
     Quantity reduce_quantity_ = 100; // 85% of reduce quantities are 100
     
     Price initial_spread_ = 13;
+    int p_mid_drift_ = 10;
 
     OrderId id_counter_ = 0;
-
     RefBook book;
 
     Side get_side() { return dist(rng) >= 50 ? Side::Buy : Side::Sell; }
@@ -156,7 +158,7 @@ private:
         if (p_add_type < p_improve_) {
             int spread = best_ask-best_bid;
             int increase = 0;
-            if (!spread == 1) increase = std::uniform_int_distribution(1,spread-1)(rng);
+            if (spread > 1) increase = std::uniform_int_distribution(1,spread-1)(rng);
             Add add = Add{
                 .id = id_counter_++, 
                 .price = add_side == Side::Buy ? best_bid + increase : best_ask - increase,
@@ -232,57 +234,49 @@ private:
     
 
 public:
-
-    FlowGenerator(int p_cancel, double add_dist_lambda, int dist_scale_factor, double cancel_dist_lambda)
-    : p_cancel_{p_cancel}, 
-    dist_scale_factor_{dist_scale_factor} {
+    
+    StreamGenerator(StreamConfig& cfg)
+    : p_cancel_{cfg.p_cancel}, 
+    dist_scale_factor_{cfg.dist_scale_factor} {
         assert(p_cancel_ + p_reduce_ <= 100);
         p_add_ = 100 - p_cancel_ - p_reduce_;
+        if (cfg.occupied_level_range > 0 ) {
+            behind_add_dist_distribution_.clear();
+            for (int i = 1; i < cfg.occupied_level_range; ++i) {
+                behind_add_dist_distribution_[i] = 100.0/cfg.occupied_level_range;
+            }
+            cancel_dist_distribution_.clear();
+            for (int i = 0; i < cfg.occupied_level_range; ++i) {
+                cancel_dist_distribution_[i] = 100.0/cfg.occupied_level_range;
+            }
+        }
+
         // lambda = 0 - normal distribution, lambda > 0 closer to touch, lambda < 0 further from touch
-        int sum = 0;
+        double sum = 0.0;
         for (int i = 1; i <= 15; ++i) {
-            behind_add_dist_distribution_[i] = exp(i*-add_dist_lambda)*behind_add_dist_distribution_[i];
+            behind_add_dist_distribution_[i] = exp(i*-cfg.add_dist_lambda)*behind_add_dist_distribution_[i];
             sum += behind_add_dist_distribution_[i];
         }
         for (int i = 1; i <= 15; ++i) {
-            behind_add_dist_distribution_[i] = behind_add_dist_distribution_[i]/sum;
+            behind_add_dist_distribution_[i] = behind_add_dist_distribution_[i]/sum*100;
         }
-        sum = 0;
+        sum = cancel_dist_distribution_[0];
         for (int i = 1; i <= 18; ++i) {
-            cancel_dist_distribution_[i] = exp(i*-cancel_dist_lambda)*cancel_dist_distribution_[i];
+            cancel_dist_distribution_[i] = exp(i*-cfg.cancel_dist_lambda)*cancel_dist_distribution_[i];
             sum += cancel_dist_distribution_[i];
         }
         for (int i = 0; i <= 18; ++i) {
-            cancel_dist_distribution_[i] = cancel_dist_distribution_[i]/sum;
-        }
-    }
-    FlowGenerator(double add_dist_lambda, int dist_scale_factor, double cancel_dist_lambda)
-    : dist_scale_factor_{dist_scale_factor} {
-        // lambda = 0 - normal distribution, lambda > 0 closer to touch, lambda < 0 further from touch
-        int sum = 0;
-        for (int i = 1; i <= 15; ++i) {
-            behind_add_dist_distribution_[i] = exp(i*-add_dist_lambda)*behind_add_dist_distribution_[i];
-            sum += behind_add_dist_distribution_[i];
-        }
-        for (int i = 1; i <= 15; ++i) {
-            behind_add_dist_distribution_[i] = behind_add_dist_distribution_[i]/sum;
-        }
-        sum = 0;
-        for (int i = 1; i <= 18; ++i) {
-            cancel_dist_distribution_[i] = exp(i*-cancel_dist_lambda)*cancel_dist_distribution_[i];
-            sum += cancel_dist_distribution_[i];
-        }
-        for (int i = 0; i <= 18; ++i) {
-            cancel_dist_distribution_[i] = cancel_dist_distribution_[i]/sum;
+            cancel_dist_distribution_[i] = cancel_dist_distribution_[i]/sum*100;
         }
     }
 
-    FlowGenerator() {}
+    StreamGenerator() {}
 
     void generate_events(std::vector<EventRecord>& events, size_t num_events) {
         size_t i = 0;
         while (i < num_events) {
             int p_event_type = dist(rng);
+            int p_price_drift = dist(rng);
             if (p_event_type < p_add_) {
                 if (add_add_event(events)) ++i;
                 continue;
@@ -296,7 +290,7 @@ public:
         }
     }
 
-
+    
 
 
 
