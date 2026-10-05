@@ -5,6 +5,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include <filesystem>
 #include "../core/events.hpp"
 #include "../core/types.hpp"
 

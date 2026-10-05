@@ -8,6 +8,7 @@
 #include <numeric>
 #include <optional>
 #include <random>
+#include <algorithm>
 
 class RefBook {
 private:
