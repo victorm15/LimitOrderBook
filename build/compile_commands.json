@@ -1,8 +1,0 @@
-[
-{
-  "directory": "/root/LimitOrderBook/build",
-  "command": "/usr/bin/c++  -I/root/LimitOrderBook/src -g -std=c++20 -Wall -Wextra -Wpedantic -o CMakeFiles/lob.dir/src/main.cpp.o -c /root/LimitOrderBook/src/main.cpp",
-  "file": "/root/LimitOrderBook/src/main.cpp",
-  "output": "CMakeFiles/lob.dir/src/main.cpp.o"
-}
-]

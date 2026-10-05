@@ -1,0 +1,5 @@
+build/
+streams/
+*.bin
+failing_seed_*.txt
+.DS_Store

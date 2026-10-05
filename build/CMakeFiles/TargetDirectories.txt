@@ -1,3 +1,0 @@
-/root/LimitOrderBook/build/CMakeFiles/lob.dir
-/root/LimitOrderBook/build/CMakeFiles/edit_cache.dir
-/root/LimitOrderBook/build/CMakeFiles/rebuild_cache.dir
