@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <numeric>
+#include <cstring>
 
 using Price = std::int32_t;
 using Quantity = std::uint32_t;

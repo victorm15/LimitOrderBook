@@ -26,7 +26,7 @@ private:
     int p_cancel_ = 46, p_add_ = 52, p_reduce_ = 2;
 
     // Add Order
-    int p_aggressive_ = 5, p_improve_ = 10, p_join_ = 10, p_behind_ = 75;
+    int p_improve_ = 10, p_join_ = 10, p_behind_ = 75; // p_aggressive = 5
     
     std::unordered_map<Quantity,int> passive_add_qty_distribution_ = {{0,29},{100,58},
     {200,8},{300,3},{400,2}}; // 0-50, then only round numbers
@@ -34,7 +34,7 @@ private:
     // Probability of having a round number within a range (e.g. 100 for the range [100,150[ )
     int p_round_aggressive_add_ = 85;
     // How deep should aggressive orders cross
-    int p_at_contra_best_ = 85, p_one_tick_ = 10, p_two_ticks_ = 5; 
+    int p_at_contra_best_ = 85, p_one_tick_ = 10; // p_two_ticks_ = 5;
     // Distance from best price for adds behind the best price
     std::unordered_map<Price,double> behind_add_dist_distribution_ = {{1,7.0},{2,7.0},{3,5.0},{4,5.0},{5,6.0},{6,6.0},{7,7.0},{8,7.0},
     {9,8.0},{10,9.0},{11,11.0},{12,8.0},{13,6.0},{14,5.0},{15,3.0}};
@@ -49,7 +49,6 @@ private:
     Quantity reduce_quantity_ = 100; // 85% of reduce quantities are 100
     
     Price initial_spread_ = 13;
-    int p_mid_drift_ = 10;
 
     OrderId id_counter_ = 0;
     RefBook book;
@@ -276,7 +275,6 @@ public:
         size_t i = 0;
         while (i < num_events) {
             int p_event_type = dist(rng);
-            int p_price_drift = dist(rng);
             if (p_event_type < p_add_) {
                 if (add_add_event(events)) ++i;
                 continue;
