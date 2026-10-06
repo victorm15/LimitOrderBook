@@ -85,6 +85,8 @@ public:
         for (size_t i = 0; i < events.size(); ++i) {
             const EventRecord& event = events[i];
             if (event.event_type == EventType::Add) {
+                    if (event.price > highest_price_) highest_price_ = event.price;
+                    if (event.price < lowest_price_) lowest_price_ = event.price;
                     ++sum_adds_;
                     Price prev_best_bid = book.best_bid();
                     Price prev_best_ask = book.best_ask();
@@ -93,8 +95,6 @@ public:
                     // Add doesn't cross - rests
                     if ((event.side == Side::Buy) ? event.price < prev_best_ask : event.price > prev_best_bid) {
                         on_order_added(event.price, event.side, event.quantity, event.id, event.side == Side::Buy ? prev_best_bid : prev_best_ask);
-                        if (event.price > highest_price_) highest_price_ = event.price;
-                        if (event.price < lowest_price_) lowest_price_ = event.price;
                     }
                     else {
                         Quantity quantity_left = event.quantity;

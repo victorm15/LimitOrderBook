@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     prefault(events);
 
     auto [stream_cfg, stream_m] = read_meta("../src/benchmarking/streams/" + stream_name + ".json");
-    BookConfig book_cfg{.base_price = stream_m.lowest_price, .band_ticks = stream_m.highest_price - stream_m.lowest_price,
+    BookConfig book_cfg{.base_price = stream_m.lowest_price, .band_ticks = stream_m.highest_price - stream_m.lowest_price + 1,
         .arena_size = stream_m.max_live_orders + 50, 
         .number_of_levels = size_t(stream_m.highest_price - stream_m.lowest_price) 
         };

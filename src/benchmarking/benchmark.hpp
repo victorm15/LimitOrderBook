@@ -29,6 +29,8 @@ template <typename Book> void run_untimed(Book& book, std::vector<EventRecord>& 
             case EventType::Reduce:
                 book.reduce(Reduce{events[i].id, events[i].quantity});
                 break;
+            default:
+                break;
         }
     }
 }
@@ -61,6 +63,8 @@ std::vector<uint32_t>& cycles) {
                 cycles[i - n_warm] = uint32_t(after - before);
                 break;
             }
+            default:
+                break;
         }
     }
 }
