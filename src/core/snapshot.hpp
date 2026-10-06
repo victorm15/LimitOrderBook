@@ -15,7 +15,7 @@ struct SnapEntry {
 };
 using Snapshot = std::vector<SnapEntry>;
 
-void print_snapshot(const Snapshot& snapshot) {
+inline void print_snapshot(const Snapshot& snapshot) {
     std::cout << "========================\n";
     std::cout << "Book:\n";
     for (const SnapEntry& ord : snapshot) {

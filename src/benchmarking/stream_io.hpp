@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <fstream>
+#include <sstream>
+#include <utility>
 #include <stdexcept>
 #include <string>
 #include <filesystem>
@@ -87,6 +89,86 @@ inline std::vector<EventRecord> read_stream(const std::string& path) {
     f.read(reinterpret_cast<char*>(evs.data()), h.count * sizeof(EventRecord));
     if (size_t(f.gcount()) != h.count * sizeof(EventRecord)) throw std::runtime_error("truncated: " + path);
     return evs;
+}
+
+
+
+
+
+
+
+
+
+
+
+inline std::string field(const std::string& text, const std::string& key,
+                         const std::string& path) {
+    const std::string pat = "\"" + key + "\"";
+    size_t k = text.find(pat);
+    if (k == std::string::npos)
+        throw std::runtime_error("missing key \"" + key + "\" in " + path);
+ 
+    size_t colon = text.find(':', k + pat.size());
+    if (colon == std::string::npos)
+        throw std::runtime_error("malformed entry for \"" + key + "\" in " + path);
+ 
+    size_t end = text.find_first_of(",}\n", colon + 1);
+    if (end == std::string::npos) end = text.size();
+ 
+    std::string v = text.substr(colon + 1, end - colon - 1);
+    // trim whitespace
+    size_t a = v.find_first_not_of(" \t\r\n");
+    size_t b = v.find_last_not_of(" \t\r\n");
+    if (a == std::string::npos)
+        throw std::runtime_error("empty value for \"" + key + "\" in " + path);
+    return v.substr(a, b - a + 1);
+}
+
+
+template <typename T>
+T number(const std::string& text, const std::string& key, const std::string& path) {
+    const std::string v = field(text, key, path);
+    std::istringstream is(v);
+    T out{};
+    is >> out;
+    if (!is || is.peek() != std::char_traits<char>::eof())
+        throw std::runtime_error("bad number for \"" + key + "\": \"" + v + "\" in " + path);
+    return out;
+}
+ 
+
+inline std::pair<StreamConfig, StreamMeasurements> read_meta(const std::string& path) {
+    std::ifstream f(path);
+    if (!f) throw std::runtime_error("cannot open " + path);
+    std::stringstream ss;
+    ss << f.rdbuf();
+    const std::string text = ss.str();
+ 
+
+    StreamConfig cfg{};
+    cfg.seed                 = number<uint64_t>(text, "seed",                 path);
+    cfg.n_events             = number<size_t>  (text, "n_events",             path);
+    cfg.p_add                = number<int>     (text, "p_add",                path);
+    cfg.p_cancel             = number<int>     (text, "p_cancel",             path);
+    cfg.p_reduce             = number<int>     (text, "p_reduce",             path);
+    cfg.add_dist_lambda      = number<double>  (text, "add_dist_lambda",      path);
+    cfg.cancel_dist_lambda   = number<double>  (text, "cancel_dist_lambda",   path);
+    cfg.dist_scale_factor    = number<int>     (text, "dist_scale_factor",    path);
+    cfg.occupied_level_range = number<int>     (text, "occupied_level_range", path);
+ 
+    StreamMeasurements m{};
+    m.level_creations             = number<uint32_t>(text, "level_creations",          path);
+    m.level_deletions             = number<uint32_t>(text, "level_deletions",          path);
+    m.fills_per_add               = number<double>  (text, "fills_per_add",            path);
+    m.average_gap                 = number<Price>   (text, "median_gap",               path);
+    m.average_occupied_levels     = number<size_t>  (text, "median_occupied_levels",   path);
+    m.avg_level_construction_dist = number<Price>   (text, "median_creation_dist",     path);
+    m.avg_level_destruction_dist  = number<Price>   (text, "median_destruction_dist",  path);
+    m.max_live_orders             = number<size_t>  (text, "max_live_orders",          path);
+    m.lowest_price                = number<Price>   (text, "lowest_price",             path);
+    m.highest_price               = number<Price>   (text, "highest_price",            path);
+ 
+    return {cfg, m};
 }
 
 #endif
