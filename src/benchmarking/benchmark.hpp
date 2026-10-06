@@ -37,27 +37,30 @@ template <typename Book> void run_timed(Book& book, std::vector<EventRecord>& ev
 std::vector<uint32_t>& cycles) {
     for (size_t i = n_warm; i < n_events; ++i) {
         switch(events[i].event_type) {
-            case EventType::Add:
+            case EventType::Add: {
                 Add a{events[i].id, events[i].price, events[i].quantity, events[i].side};
                 uint64_t before = get_tsc();
                 book.add(a, NullSink{});
                 uint64_t after = get_tsc();
                 cycles[i - n_warm] = uint32_t(after - before); 
                 break;
-            case EventType::Cancel:
+            }
+            case EventType::Cancel: {
                 Cancel c{events[i].id};
                 uint64_t before = get_tsc();
                 book.cancel(c, NullSink{});
                 uint64_t after = get_tsc();
                 cycles[i - n_warm] = uint32_t(after - before);
                 break;
-            case EventType::Reduce:
+            }   
+            case EventType::Reduce: {
                 Reduce r{events[i].id, events[i].quantity};
                 uint64_t before = get_tsc();
                 book.reduce(r, NullSink{});
                 uint64_t after = get_tsc();
                 cycles[i - n_warm] = uint32_t(after - before);
                 break;
+            }
         }
     }
 }
@@ -78,7 +81,7 @@ template <typename Book> void benchmark(Book& book, std::string book_name, std::
 
     run_untimed(book, events, n_events, n_warm);
     run_timed(book, events, n_events, n_warm, book_timings);
-    std::cout << book_name << ":\n" << "best bid: " << book.best_bid() << "best ask: " book.best_ask() << "\n";
+    std::cout << book_name << ":\n" << "best bid: " << book.best_bid() << "best ask: " << book.best_ask() << "\n";
 
     for (uint32_t& t : book_timings) t = (t > timer_overhead) ? t - timer_overhead : 0;
     std::sort(book_timings.begin(), book_timings.end());

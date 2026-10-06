@@ -17,9 +17,10 @@ int main(int argc, char** argv) {
     prefault(events);
 
     auto [stream_cfg, stream_m] = read_meta("../src/benchmarking/streams/" + stream_name + ".json");
-    BookConfig book_cfg{.arena_size = 1.1*stream_m.max_live_orders, .base_price = stream_m.lowest_price, 
-        .number_of_levels = stream_m.highest_price - stream_m.lowest_price, 
-        .band_ticks = stream_m.highest_price - stream_m.lowest_price};
+    BookConfig book_cfg{.base_price = stream_m.lowest_price, .band_ticks = stream_m.highest_price - stream_m.lowest_price,
+        .arena_size = stream_m.max_live_orders + 50, , 
+        .number_of_levels = size_t(stream_m.highest_price - stream_m.lowest_price), 
+        };
     size_t n_events = stream_cfg.n_events;
     std::cout << "Benchmarking books on " << stream_name << ":\n";
     std::vector<uint32_t> book_timings(n_events-n_warm, 0);
