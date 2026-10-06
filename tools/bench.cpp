@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
     std::cout << "Benchmarking books on " << stream_name << ":\n";
     std::vector<uint32_t> book_timings(n_events-n_warm, 0);
     uint32_t timer_overhead = measure_timer_overhead();
+    std::cout << "Timer Overhead: " << timer_overhead << "\n";
 
     ArrayBook array_book(book_cfg);
     benchmark(array_book, "ArrayBook", events, book_timings, n_warm, n_events, timer_overhead);
