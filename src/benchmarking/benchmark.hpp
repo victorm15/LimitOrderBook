@@ -24,10 +24,10 @@ template <typename Book> void run_untimed(Book& book, std::vector<EventRecord>& 
                 book.add(Add{events[i].id, events[i].price, events[i].quantity, events[i].side}, NullSink{});
                 break;
             case EventType::Cancel:
-                book.cancel(Cancel{events[i].id}, NullSink{});
+                book.cancel(Cancel{events[i].id});
                 break;
             case EventType::Reduce:
-                book.reduce(Reduce{events[i].id, events[i].quantity}, NullSink{});
+                book.reduce(Reduce{events[i].id, events[i].quantity});
                 break;
         }
     }
@@ -48,7 +48,7 @@ std::vector<uint32_t>& cycles) {
             case EventType::Cancel: {
                 Cancel c{events[i].id};
                 uint64_t before = get_tsc();
-                book.cancel(c, NullSink{});
+                book.cancel(c);
                 uint64_t after = get_tsc();
                 cycles[i - n_warm] = uint32_t(after - before);
                 break;
@@ -56,7 +56,7 @@ std::vector<uint32_t>& cycles) {
             case EventType::Reduce: {
                 Reduce r{events[i].id, events[i].quantity};
                 uint64_t before = get_tsc();
-                book.reduce(r, NullSink{});
+                book.reduce(r);
                 uint64_t after = get_tsc();
                 cycles[i - n_warm] = uint32_t(after - before);
                 break;

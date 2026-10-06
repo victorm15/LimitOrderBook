@@ -18,8 +18,8 @@ int main(int argc, char** argv) {
 
     auto [stream_cfg, stream_m] = read_meta("../src/benchmarking/streams/" + stream_name + ".json");
     BookConfig book_cfg{.base_price = stream_m.lowest_price, .band_ticks = stream_m.highest_price - stream_m.lowest_price,
-        .arena_size = stream_m.max_live_orders + 50, , 
-        .number_of_levels = size_t(stream_m.highest_price - stream_m.lowest_price), 
+        .arena_size = stream_m.max_live_orders + 50, 
+        .number_of_levels = size_t(stream_m.highest_price - stream_m.lowest_price) 
         };
     size_t n_events = stream_cfg.n_events;
     std::cout << "Benchmarking books on " << stream_name << ":\n";
