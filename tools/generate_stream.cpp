@@ -6,6 +6,7 @@
 int main(int argc, char** argv) {
     std::string file_name = argc > 1 ? argv[1] : "stream0";
     StreamConfig cfg{.n_events = 1'000'000};
+    std::cout << "Generating " << file_name << "with " << cfg.n_events << "events";
     StreamGenerator gen(cfg);
     std::vector<EventRecord> events;
     events.reserve(cfg.n_events);
