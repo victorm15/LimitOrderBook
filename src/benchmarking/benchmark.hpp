@@ -90,7 +90,7 @@ template <typename Book> void benchmark(Book& book, std::string book_name, std::
     for (uint32_t& t : book_timings) t = (t > timer_overhead) ? t - timer_overhead : 0;
     std::sort(book_timings.begin(), book_timings.end());
 
-    
+
     uint32_t prev = book_timings[0];
     std::cout << "{" << prev ", ";
     for (size_t i = 1; i < book_timings.size(); ++i) {
@@ -99,6 +99,7 @@ template <typename Book> void benchmark(Book& book, std::string book_name, std::
             prev = book_timings[i];
         }
     }
+    std::cout << "}\n"
 
 
     std::cout << "p50: " << book_timings[size_t((book_timings.size()-1)*0.5)] 
