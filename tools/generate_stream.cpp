@@ -5,8 +5,17 @@
 
 int main(int argc, char** argv) {
     std::string file_name = argc > 1 ? argv[1] : "stream0";
-    uint64_t cust = argc > 2 ? std::atoi(argv[2]) : 1;
-    StreamConfig cfg{.n_events = 1'000'000, .dist_scale_factor = cust};
+    
+    StreamConfig cfg;
+    
+    if (file_name == "stream1") {
+        cfg.dist_scale_factor = 100;
+    }
+    else {
+        file_name = "stream0";
+    }
+
+
     std::cout << "Generating " << file_name << " with " << cfg.n_events << "events\n";
     StreamGenerator gen(cfg);
     std::vector<EventRecord> events;

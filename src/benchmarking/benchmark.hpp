@@ -7,16 +7,16 @@
 #include "pmc_cycles.hpp"
 #include <string>
 
-#if defined(__x86_64__)
-    #include <x86intrin.h>
-#endif
+// #if defined(__x86_64__)
+//     #include <x86intrin.h>
+// #endif
 
-static inline uint64_t get_tsc() {
-    unsigned aux;
-    uint64_t t = __rdtscp(&aux);
-    _mm_lfence();
-    return t;
-}
+// static inline uint64_t get_tsc() {
+//     unsigned aux;
+//     uint64_t t = __rdtscp(&aux);
+//     _mm_lfence();
+//     return t;
+// }
 
 template <typename Book> void run_untimed(Book& book, std::vector<EventRecord>& events, size_t n_events, size_t n_warm) {
     for (size_t i = 0; i < n_warm; ++i) {

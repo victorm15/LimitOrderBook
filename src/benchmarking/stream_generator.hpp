@@ -157,7 +157,7 @@ private:
         if (p_add_type < p_improve_) {
             int spread = best_ask-best_bid;
             int increase = 0;
-            if (spread > 1) increase = std::uniform_int_distribution(1,spread-1)(rng);
+            if (spread-1 >= dist_scale_factor_) increase = std::uniform_int_distribution(1,(spread-1)/dist_scale_factor_)(rng)*dist_scale_factor_;
             Add add = Add{
                 .id = id_counter_++, 
                 .price = add_side == Side::Buy ? best_bid + increase : best_ask - increase,
@@ -175,8 +175,8 @@ private:
         if (p_aggressive_ticks < p_at_contra_best_) ticks = 0;
         else {
             p_aggressive_ticks -= p_at_contra_best_;
-            if (p_aggressive_ticks < p_one_tick_) ticks = 1;
-            else ticks = 2;
+            if (p_aggressive_ticks < p_one_tick_) ticks = dist_scale_factor_;
+            else ticks = 2*dist_scale_factor_;
         }
         Add add = Add{
                 .id = id_counter_++, 

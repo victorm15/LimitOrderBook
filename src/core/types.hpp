@@ -41,7 +41,7 @@ struct BookConfig {
 
 struct StreamConfig {
     uint64_t seed = 12345;
-    size_t   n_events = 1000;
+    size_t   n_events = 1'000'000;
     int      p_cancel = 46, p_add = 52, p_reduce = 2;
     double   add_dist_lambda = 0.0, cancel_dist_lambda = 0.0;
     int      dist_scale_factor = 1;
