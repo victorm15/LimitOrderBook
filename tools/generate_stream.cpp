@@ -10,21 +10,21 @@ int main(int argc, char** argv) {
     if (file_name == "stream1") {
         cfg.dist_scale_factor = 100;
     }
-    if (file_name == "stream2") {
+    else if (file_name == "stream2") {
         cfg.dist_scale_factor = 100;
         cfg.p_join = 0;
         cfg.p_behind = 50;
         cfg.p_improve = 0;
         // cfg.p_aggressive = 50;
     }
-    if (file_name == "stream3") {
+    else if (file_name == "stream3") {
         cfg.dist_scale_factor = 200;
         cfg.p_join = 0;
         cfg.p_behind = 50;
         cfg.p_improve = 0;
         // cfg.p_aggressive = 50;
     }
-    if (file_name == "stream4") {
+    else if (file_name == "stream4") {
         cfg.dist_scale_factor = 10;
         cfg.p_join = 0;
         cfg.p_behind = 50;
