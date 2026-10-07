@@ -98,7 +98,7 @@ template <typename Book> void benchmark(Book& book, std::string book_name, std::
 
     run_untimed(book, events, n_events, n_warm);
     run_timed(book, events, n_events, n_warm, book_timings, pmc);
-    std::cout << book_name << ":\n" << "best bid: " << book.best_bid() << "best ask: " << book.best_ask() << "\n";
+    std::cout << book_name << ":\n" << "best bid: " << book.best_bid() << " best ask: " << book.best_ask() << "\n";
 
     for (uint32_t& t : book_timings) t = (t > timer_overhead) ? t - timer_overhead : 0;
     std::sort(book_timings.begin(), book_timings.end());
