@@ -46,6 +46,9 @@ struct StreamConfig {
     double   add_dist_lambda = 0.0, cancel_dist_lambda = 0.0;
     int      dist_scale_factor = 1;
     int      occupied_level_range = 0; // 0 when default range used
+    int      p_join = 10;
+    int      p_behind = 75;
+    int      p_improve = 10;
 };
 
 struct StreamMeasurements {

@@ -236,7 +236,10 @@ public:
     
     StreamGenerator(StreamConfig& cfg)
     : p_cancel_{cfg.p_cancel}, 
-    dist_scale_factor_{cfg.dist_scale_factor} {
+    dist_scale_factor_{cfg.dist_scale_factor},
+    p_behind_{cfg.p_behind},
+    p_join_{cfg.p_join},
+    p_improve_{cfg.p_improve} {
         assert(p_cancel_ + p_reduce_ <= 100);
         p_add_ = 100 - p_cancel_ - p_reduce_;
         if (cfg.occupied_level_range > 0 ) {

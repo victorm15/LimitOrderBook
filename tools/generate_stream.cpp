@@ -10,13 +10,17 @@ int main(int argc, char** argv) {
     
     if (file_name == "stream1") {
         cfg.dist_scale_factor = 100;
+        cfg.p_join = 0;
+        cfg.p_behind = 50;
+        cfg.p_improve = 0;
+        // cfg.p_aggressive = 50;
     }
     else {
         file_name = "stream0";
     }
 
 
-    std::cout << "Generating " << file_name << " with " << cfg.n_events << "events\n";
+    std::cout << "Generating " << file_name << " with " << cfg.n_events << " events\n";
     StreamGenerator gen(cfg);
     std::vector<EventRecord> events;
     events.reserve(cfg.n_events);
