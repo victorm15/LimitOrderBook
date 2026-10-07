@@ -104,15 +104,15 @@ template <typename Book> void benchmark(Book& book, std::string book_name, std::
     std::sort(book_timings.begin(), book_timings.end());
 
 
-    // uint32_t prev = book_timings[0];
-    // std::cout << "{" << prev << ", ";
-    // for (size_t i = 1; i < book_timings.size(); ++i) {
-    //     if (book_timings[i] != prev) {
-    //         std::cout << book_timings[i] << ", ";
-    //         prev = book_timings[i];
-    //     }
-    // }
-    // std::cout << "}\n";
+    uint32_t prev = book_timings[0];
+    std::cout << "{" << prev << ", ";
+    for (size_t i = 1; i < book_timings.size(); ++i) {
+        if (book_timings[i] != prev) {
+            std::cout << book_timings[i] << ", ";
+            prev = book_timings[i];
+        }
+    }
+    std::cout << "}\n";
 
 
     std::cout << "p50: " << book_timings[size_t((book_timings.size()-1)*0.5)] 
