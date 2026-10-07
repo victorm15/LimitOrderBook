@@ -13,10 +13,10 @@ int main(int argc, char** argv) {
     std::string stream_name = argc > 1 ? argv[1] : "stream0";
     size_t n_warm = argc > 2 ? std::atoi(argv[2]) : 100'000;
 
-    std::vector<EventRecord> events = read_stream("../src/benchmarking/streams/" + stream_name + ".bin");
+    std::vector<EventRecord> events = read_stream("streams/" + stream_name + ".bin");
     prefault(events);
 
-    auto [stream_cfg, stream_m] = read_meta("../src/benchmarking/streams/" + stream_name + ".json");
+    auto [stream_cfg, stream_m] = read_meta("streams/" + stream_name + ".json");
     BookConfig book_cfg{.base_price = stream_m.lowest_price, .band_ticks = stream_m.highest_price - stream_m.lowest_price + 1,
         .arena_size = stream_m.max_live_orders + 50, 
         .number_of_levels = size_t(stream_m.highest_price - stream_m.lowest_price) 

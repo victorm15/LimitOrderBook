@@ -16,6 +16,6 @@ int main(int argc, char** argv) {
     StreamAnalyser analyser;
     StreamMeasurements m = analyser.analyse(events);
 
-    write_stream("../src/benchmarking/streams/" + file_name + ".bin", events);
-    write_meta("../src/benchmarking/streams/" + file_name + ".json", cfg, m);
+    write_stream("streams/" + file_name + ".bin", events);
+    write_meta("streams/" + file_name + ".json", cfg, m);
 }
