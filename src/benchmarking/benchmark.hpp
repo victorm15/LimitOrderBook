@@ -87,14 +87,14 @@ inline uint32_t measure_timer_overhead(PmcCycles& pmc, size_t n = 1'000'000) {
         // v[i] = uint32_t(t1 - t0);
         const uint64_t t0 = pmc.read();
         const uint64_t t1 = pmc.read();
-        v[i] = uint32_t(tmc.delta(t0, t1));
+        v[i] = uint32_t(pmc.delta(t0, t1));
     }
     std::sort(v.begin(), v.end());
     return v[v.size() / 2];
 }
 
 template <typename Book> void benchmark(Book& book, std::string book_name, std::vector<EventRecord>& events, 
-    std::vector<uint32_t>& book_timings, size_t n_warm, size_t n_events, uint32_t timer_overhead, PmcCycles& pmc {
+    std::vector<uint32_t>& book_timings, size_t n_warm, size_t n_events, uint32_t timer_overhead, PmcCycles& pmc) {
 
     run_untimed(book, events, n_events, n_warm);
     run_timed(book, events, n_events, n_warm, book_timings, pmc);
