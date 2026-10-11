@@ -23,18 +23,24 @@ int main(int argc, char** argv) {
         cfg.p_reduce = 0;
     }
     else if (file_name == "stream3") {
-        cfg.dist_scale_factor = 200;
+        cfg.dist_scale_factor = 100;
+
         cfg.p_join = 0;
         cfg.p_behind = 50;
         cfg.p_improve = 0;
         // cfg.p_aggressive = 50;
+
+        cfg.p_add = 50;
+        cfg.p_cancel = 50;
+        cfg.p_reduce = 0;
     }
     else if (file_name == "stream4") {
-        cfg.dist_scale_factor = 10;
-        cfg.p_join = 0;
-        cfg.p_behind = 50;
-        cfg.p_improve = 0;
-        // cfg.p_aggressive = 50;
+        cfg.dist_scale_factor = 100;
+        cfg.cancel_dist_lambda = -0.5;
+    }
+    else if (file_name == "stream5") {
+        cfg.dist_scale_factor = 100;
+        cfg.cancel_dist_lambda = 0.5;
     }
     else {
         file_name = "stream0";
