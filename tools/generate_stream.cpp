@@ -42,6 +42,30 @@ int main(int argc, char** argv) {
         cfg.dist_scale_factor = 100;
         cfg.cancel_dist_lambda = 0.5;
     }
+    else if (file_name == "stream6") {
+        cfg.dist_scale_factor = 100;
+
+        cfg.p_join = 10;
+        cfg.p_behind = 50;
+        cfg.p_improve = 10;
+        // cfg.p_aggressive = 30;
+
+        cfg.p_add = 100;
+        cfg.p_cancel = 0;
+        cfg.p_reduce = 0;
+    }
+    else if (file_name == "stream7") {
+        cfg.dist_scale_factor = 100;
+
+        cfg.p_join = 10;
+        cfg.p_behind = 65;
+        cfg.p_improve = 10;
+        // cfg.p_aggressive = 15;
+
+        cfg.p_add = 100;
+        cfg.p_cancel = 0;
+        cfg.p_reduce = 0;
+    }
     else {
         file_name = "stream0";
     }
@@ -53,6 +77,7 @@ int main(int argc, char** argv) {
     events.reserve(cfg.n_events);
     gen.generate_events(events, cfg.n_events);
 
+    std::cout << "Analysing stream\n";
     StreamAnalyser analyser;
     StreamMeasurements m = analyser.analyse(events);
 

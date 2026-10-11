@@ -55,6 +55,7 @@ private:
         live_[id] = {p, s, q};
         if (live_.size() > max_live_orders_) max_live_orders_ = live_.size();
     }
+    
     void on_order_removed(Side s, OrderId id, Price best_price) {
         auto& m = s == Side::Buy ? bids_ : asks_;
         assert(live_.contains(id));
@@ -123,6 +124,7 @@ public:
             }
             
             if (i != 0 && i % 100 == 0) {
+                if (i % 10000 == 0) std::cout << i << " / " << events.size() << "\n";
                 std::vector<Price> gaps;
                 if (bids_.size() > 1 && asks_.size() > 1) {
                     Price prev = bids_.begin()->first;
