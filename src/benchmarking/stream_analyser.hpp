@@ -124,7 +124,7 @@ public:
             }
             
             if (i != 0 && i % 100 == 0) {
-                if (i % 10000 == 0) std::cout << i << " / " << events.size() << "\n";
+                if (i % 100000 == 0) std::cout << "anls: " << i << " / " << events.size() << "\n";
                 std::vector<Price> gaps;
                 if (bids_.size() > 1 && asks_.size() > 1) {
                     Price prev = bids_.begin()->first;
