@@ -9,62 +9,47 @@ int main(int argc, char** argv) {
     StreamConfig cfg;
     if (file_name == "stream1") {
         cfg.dist_scale_factor = 100;
+        cfg.cancel_dist_lambda = -0.5;
     }
     else if (file_name == "stream2") {
         cfg.dist_scale_factor = 100;
-
-        cfg.p_join = 0;
-        cfg.p_behind = 50;
-        cfg.p_improve = 0;
-        // cfg.p_aggressive = 50;
-
-        cfg.p_add = 100;
-        cfg.p_cancel = 0;
-        cfg.p_reduce = 0;
+        cfg.cancel_dist_lambda = -0.4;
     }
     else if (file_name == "stream3") {
         cfg.dist_scale_factor = 100;
-
-        cfg.p_join = 0;
-        cfg.p_behind = 50;
-        cfg.p_improve = 0;
-        // cfg.p_aggressive = 50;
-
-        cfg.p_add = 50;
-        cfg.p_cancel = 50;
-        cfg.p_reduce = 0;
+        cfg.cancel_dist_lambda = -0.3;
     }
     else if (file_name == "stream4") {
         cfg.dist_scale_factor = 100;
-        cfg.cancel_dist_lambda = -0.5;
+        cfg.cancel_dist_lambda = -0.2;
     }
     else if (file_name == "stream5") {
         cfg.dist_scale_factor = 100;
-        cfg.cancel_dist_lambda = 0.5;
+        cfg.cancel_dist_lambda = -0.1;
     }
     else if (file_name == "stream6") {
         cfg.dist_scale_factor = 100;
-
-        cfg.p_join = 10;
-        cfg.p_behind = 50;
-        cfg.p_improve = 10;
-        // cfg.p_aggressive = 30;
-
-        cfg.p_add = 100;
-        cfg.p_cancel = 0;
-        cfg.p_reduce = 0;
+        cfg.cancel_dist_lambda = 0.0;
     }
     else if (file_name == "stream7") {
         cfg.dist_scale_factor = 100;
-
-        cfg.p_join = 10;
-        cfg.p_behind = 65;
-        cfg.p_improve = 10;
-        // cfg.p_aggressive = 15;
-
-        cfg.p_add = 100;
-        cfg.p_cancel = 0;
-        cfg.p_reduce = 0;
+        cfg.cancel_dist_lambda = 0.1;
+    }
+    else if (file_name == "stream8") {
+        cfg.dist_scale_factor = 100;
+        cfg.cancel_dist_lambda = 0.2;
+    }
+    else if (file_name == "stream9") {
+        cfg.dist_scale_factor = 100;
+        cfg.cancel_dist_lambda = 0.3;
+    }
+    else if (file_name == "stream10") {
+        cfg.dist_scale_factor = 100;
+        cfg.cancel_dist_lambda = 0.4;
+    }
+    else if (file_name == "stream11") {
+        cfg.dist_scale_factor = 100;
+        cfg.cancel_dist_lambda = 0.5;
     }
     else {
         file_name = "stream0";
