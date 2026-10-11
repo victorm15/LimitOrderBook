@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
             cfg.dist_scale_factor = 100;
             cfg.cancel_dist_lambda = dist_lambdas[i];
 
-            file_name = "stream_dlt" + i;
+            file_name = "stream_dlt" + std::to_string(i);
             std::cout << "Generating " << file_name << " with " << cfg.n_events << " events\n";
             StreamGenerator gen(cfg);
             std::vector<EventRecord> events;
