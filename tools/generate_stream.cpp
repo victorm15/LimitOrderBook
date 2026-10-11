@@ -76,11 +76,11 @@ int main(int argc, char** argv) {
     std::vector<EventRecord> events;
     events.reserve(cfg.n_events);
     gen.generate_events(events, cfg.n_events);
-    std::cout << "Stream generated\n"
+    std::cout << "Stream generated\n";
     std::cout << "Analysing stream\n";
     StreamAnalyser analyser;
     StreamMeasurements m = analyser.analyse(events);
-    std::cout << "Stream analysed\n"
+    std::cout << "Stream analysed\n";
     
 
     write_stream("streams/" + file_name + ".bin", events);
