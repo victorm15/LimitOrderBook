@@ -277,7 +277,7 @@ public:
     void generate_events(std::vector<EventRecord>& events, size_t num_events) {
         size_t i = 0;
         while (i < num_events) {
-            if (i % 100000 == 0) std::cout << "gen: " << i << " / " << events.size() << "\n";
+            if (i % 100000 == 0) std::cout << "gen: " << i << " / " << num_events << "\n";
             int p_event_type = dist(rng);
             if (p_event_type < p_add_) {
                 if (add_add_event(events)) ++i;
