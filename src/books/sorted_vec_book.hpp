@@ -6,6 +6,7 @@
 #include "../core/snapshot.hpp"
 #include "../core/sinks.hpp"
 #include "../core/arena.hpp"
+#include "../../third_party/unordered_dense.h"
 #include <vector>
 #include <unordered_map>
 #include <cassert>
@@ -24,7 +25,8 @@ private:
 
     std::vector<Level> bids_; // ascending
     std::vector<Level> asks_; // descending
-    std::unordered_map<OrderId, Handle> id_to_handle_;
+    ankerl::unordered_dense::map<OrderId, Handle> id_to_handle_;
+    // std::unordered_map<OrderId, Handle> id_to_handle_;
     OrderArena arena_;
 
     void push_back(Level& lvl, Handle h) {
@@ -197,27 +199,6 @@ public:
         assert(lvl_idx != NOT_FOUND);
         reduce_order(lvl_idx, o, e.quantity);
     }
-
-    // void replace(const Replace& r) {
-    //     Handle h = id_to_handle_.at(r.old_id);
-    //     Order& o = arena_[h];
-    //     size_t old_lvl_idx = index_at_price(o.side, o.price);
-    //     assert(old_lvl_idx != NOT_FOUND);
-    //     Level& old_lvl = get_level(o.side, old_lvl_idx);
-    //     unlink(old_lvl, h);
-    //     if (old_lvl.total_orders == 0) {
-    //         if (o.side == Side::Buy) bids_.erase(bids_.begin() + old_lvl_idx);
-    //         else asks_.erase(asks_.begin() + old_lvl_idx);
-    //     }
-
-    //     o.price = r.price;
-    //     o.quantity = r.quantity;
-    //     o.id = r.new_id;
-    //     id_to_handle_.erase(r.old_id);
-    //     assert(!id_to_handle_.contains(r.new_id));
-    //     id_to_handle_[r.new_id] = h;
-    //     insert_order(o, h);
-    // }
 
     template <typename Sink> void replace(const Replace& r, Sink&& sink) {
         Side side = arena_[id_to_handle_.at(r.old_id)].side;

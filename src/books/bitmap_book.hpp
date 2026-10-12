@@ -7,6 +7,7 @@
 #include "../core/sinks.hpp"
 #include "../core/snapshot.hpp"
 #include <unordered_map>
+#include "../../third_party/unordered_dense.h"
 #include <vector>
 #include <cassert>
 #include <cmath>
@@ -27,7 +28,8 @@ private:
     Price best_ask_;
     OrderArena arena_;
     Price base_price_;
-    std::unordered_map<OrderId, Handle> id_to_handle_;
+    ankerl::unordered_dense::map<OrderId, Handle> id_to_handle_;
+    // std::unordered_map<OrderId, Handle> id_to_handle_;
 
     void push_back(Level& lvl, Handle h) {
         Order& o = arena_[h];
@@ -196,35 +198,6 @@ public:
         sink(Fill {resting.id, resting.price, e.quantity});
         reduce_order(resting, e.quantity);
     }
-    
-    // void replace(const Replace& r) {
-    //     Handle h = id_to_handle_.at(r.old_id);
-    //     Order& o = arena_[h];
-    //     Level& old_lvl = level_of(o.side, o.price);
-    //     unlink(old_lvl, h);
-    //     if (old_lvl.total_orders == 0) clear_bit(o.side, o.price);
-    //     bool is_buy = o.side == Side::Buy;
-    //     bool was_best_price = is_buy ? o.price == best_bid_ : o.price == best_ask_;
-
-    //     o.price = r.price;
-    //     o.quantity = r.quantity;
-    //     o.id = r.new_id;
-    //     id_to_handle_.erase(r.old_id);
-    //     assert(!id_to_handle_.contains(r.new_id));
-    //     id_to_handle_[r.new_id] = h;
-    //     Level& new_lvl = level_of(o.side, o.price);
-    //     if (new_lvl.total_orders == 0) set_bit(o.side, o.price);
-    //     push_back(new_lvl, h);
-
-    //     if (is_buy) {
-    //         if (o.price >= best_bid_) best_bid_ = o.price;
-    //         else if (was_best_price) update_best_bid(best_bid_);
-    //     }
-    //     else {
-    //         if (o.price <= best_ask_) best_ask_ = o.price;
-    //         else if (was_best_price) update_best_ask(best_ask_);
-    //     }
-    // }
     
     template <typename Sink> void replace(const Replace& r, Sink&& sink) {
         Side side = arena_[id_to_handle_.at(r.old_id)].side;

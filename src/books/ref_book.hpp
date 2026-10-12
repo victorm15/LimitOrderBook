@@ -4,6 +4,7 @@
 #include "../core/events.hpp"
 #include "../core/sinks.hpp"
 #include "../core/snapshot.hpp"
+#include "../../third_party/unordered_dense.h"
 #include <cassert>
 #include <numeric>
 #include <optional>

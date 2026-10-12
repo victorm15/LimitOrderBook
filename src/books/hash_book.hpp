@@ -6,6 +6,7 @@
 #include "../core/sinks.hpp"
 #include "../core/arena.hpp"
 #include "../core/snapshot.hpp"
+#include "../../third_party/unordered_dense.h"
 #include <vector>
 #include <cassert>
 #include <unordered_map>
@@ -22,9 +23,11 @@ private:
         uint32_t total_orders = 0;
         
     };
-    std::unordered_map<Price, Level> bids_, asks_;
+    ankerl::unordered_dense::map<Price, Level> bids_, asks_;
+    // std::unordered_map<Price, Level> bids_, asks_;
     mutable std::vector<Price> bid_heap_, ask_heap_;
-    std::unordered_map<OrderId, Handle> id_to_handle_;
+    ankerl::unordered_dense::map<OrderId, Handle> id_to_handle_;
+    // std::unordered_map<OrderId, Handle> id_to_handle_;
     OrderArena arena_;
 
     void push_back(Level& lvl, Handle h) {
@@ -61,13 +64,13 @@ private:
     }
 
     Level& level_of(Side side, Price price) {
-        std::unordered_map<Price, Level>& map = (side == Side::Buy) ? bids_ : asks_;
+        auto& map = (side == Side::Buy) ? bids_ : asks_;
         assert(map.contains(price));
         return map.at(price);
     }
 
     const Level& level_of(Side side, Price price) const {
-        const std::unordered_map<Price, Level>& map = (side == Side::Buy) ? bids_ : asks_;
+        const auto& map = (side == Side::Buy) ? bids_ : asks_;
         return map.at(price);
     }
 
@@ -91,7 +94,7 @@ private:
 
     void insert_order(Order& o, Handle h) {
         bool is_buy = o.side == Side::Buy;
-        std::unordered_map<Price, Level>& map = is_buy ? bids_ : asks_;
+        auto& map = is_buy ? bids_ : asks_;
         if (!map.contains(o.price)) {
             map.insert({o.price, Level{}});
             if (is_buy) {
@@ -169,23 +172,7 @@ public:
         reduce_order(o, e.quantity);
     }
 
-    // void replace(const Replace& r) {
-    //     Handle h = id_to_handle_.at(r.old_id);
-    //     Order& o = arena_[h];
-    //     Level& old_lvl = level_of(o.side, o.price);
-    //     unlink(old_lvl, h);
-    //     if (old_lvl.total_orders == 0) {
-    //             if (o.side == Side::Buy) bids_.erase(o.price); else asks_.erase(o.price);
-    //     }
 
-    //     o.price = r.price;
-    //     o.quantity = r.quantity;
-    //     o.id = r.new_id;
-    //     id_to_handle_.erase(r.old_id);
-    //     assert(!id_to_handle_.contains(r.new_id));
-    //     id_to_handle_[r.new_id] = h;
-    //     insert_order(o, h);
-    // }
 
     template <typename Sink> void replace(const Replace& r, Sink&& sink) {
         Side side = arena_[id_to_handle_.at(r.old_id)].side;
