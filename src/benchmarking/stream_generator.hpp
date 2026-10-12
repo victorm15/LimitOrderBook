@@ -117,11 +117,11 @@ private:
         Price best_bid = book.best_bid();
         Price best_ask = book.best_ask();
         if (best_bid == NO_BID && best_ask == NO_ASK) {
-            best_bid = mid_ - initial_spread_/2;
+            best_bid = mid_ - dist_scale_factor_*initial_spread_/2;
             best_ask = best_bid + initial_spread_;
         }
-        else if (best_bid == NO_BID) best_bid = best_ask - initial_spread_;
-        else if (best_ask == NO_ASK) best_ask = best_bid + initial_spread_;
+        else if (best_bid == NO_BID) best_bid = best_ask - dist_scale_factor_*initial_spread_;
+        else if (best_ask == NO_ASK) best_ask = best_bid + dist_scale_factor_*initial_spread_;
 
         // Add order behind BBO
         if (p_add_type < p_behind_) {
