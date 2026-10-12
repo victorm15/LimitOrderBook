@@ -8,7 +8,7 @@ int main(int argc, char** argv) {
 
     std::cout << "Reading " << file_name << "\n";
     
-    std::vector<EventRecord> events = read_stream(file_name);
+    std::vector<EventRecord> events = read_stream("streams/" + file_name + ".bin");
     std::cout << "Analysing" << file_name << "\n";
     StreamAnalyser analyser;
     StreamMeasurements m = analyser.analyse(events);
