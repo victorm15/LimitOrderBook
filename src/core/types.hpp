@@ -62,6 +62,7 @@ struct StreamMeasurements {
     Price highest_price;
     Price avg_level_destruction_dist;
     Price avg_level_construction_dist;
+    uint32_t bbos_deleted;
 
 };
 

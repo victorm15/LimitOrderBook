@@ -29,9 +29,9 @@ inline void write_meta(const std::string& path, const StreamConfig& cfg, const S
     f << "    \"add_dist_lambda\": "      << cfg.add_dist_lambda      << ",\n";
     f << "    \"cancel_dist_lambda\": "   << cfg.cancel_dist_lambda   << ",\n";
     f << "    \"dist_scale_factor\": "    << cfg.dist_scale_factor    << ",\n";
-    f << "    \"occupied_level_range\": " << cfg.occupied_level_range << "\n";
-    f << "    \"p_join\": "               << cfg.p_join               << "\n";
-    f << "    \"p_improve\": "            << cfg.p_improve            << "\n";
+    f << "    \"occupied_level_range\": " << cfg.occupied_level_range << ",\n";
+    f << "    \"p_join\": "               << cfg.p_join               << ",\n";
+    f << "    \"p_improve\": "            << cfg.p_improve            << ",\n";
     f << "    \"p_behind\": "             << cfg.p_behind             << "\n";
     f << "  },\n";
     f << "  \"measured\": {\n";
@@ -44,7 +44,8 @@ inline void write_meta(const std::string& path, const StreamConfig& cfg, const S
     f << "    \"median_destruction_dist\": "      << m.avg_level_destruction_dist   << ",\n";
     f << "    \"max_live_orders\": "              << m.max_live_orders              << ",\n";
     f << "    \"lowest_price\": "                 << m.lowest_price                 << ",\n";
-    f << "    \"highest_price\": "                << m.highest_price                << "\n";
+    f << "    \"highest_price\": "                << m.highest_price                << ",\n";
+    f << "    \"bbos_deleted\": "                 << m.bbos_deleted                 << "\n";
     f << "  }\n";
     f << "}\n";
     f.close();

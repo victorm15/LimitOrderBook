@@ -28,6 +28,7 @@ private:
     std::vector<size_t> occupied_levels_;
     uint32_t sum_fills_ = 0;
     uint32_t sum_adds_ = 0;
+    uint32_t bbos_deleted;
 
     std::map<Price, uint32_t> bids_, asks_;
     std::unordered_map<OrderId, OrderData> live_;
@@ -64,7 +65,9 @@ private:
         if (--m[p] == 0) {
             ++levels_destroyed_;
             if (best_price != NO_ASK && best_price != NO_BID) {
-                level_destruction_dists_.push_back(s == Side::Buy ? best_price - p : p - best_price);
+                Price destruction_dist = s == Side::Buy ? best_price - p : p - best_price;
+                level_destruction_dists_.push_back(destruction_dist);
+                if (destruction_dist == 0) ++bbos_deleted;
             }
             m.erase(p);
         }
@@ -166,8 +169,8 @@ public:
             .lowest_price = lowest_price_,
             .highest_price = highest_price_,
             .avg_level_destruction_dist = avg_destruction_dist,
-            .avg_level_construction_dist = avg_creation_dist
-            
+            .avg_level_construction_dist = avg_creation_dist,
+            .bbos_deleted = bbos_deleted
         };
 
 

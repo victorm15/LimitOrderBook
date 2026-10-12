@@ -9,7 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(lob INTERFACE)
 target_include_directories(lob INTERFACE src)
 
-foreach(t bench generate_stream differential_test)
+foreach(t bench generate_stream differential_test analyse_stream)
   add_executable(${t} tools/${t}.cpp)
   target_link_libraries(${t} PRIVATE lob)
 endforeach()
