@@ -8,8 +8,7 @@ int main(int argc, char** argv) {
 
     std::cout << "Reading " << file_name << "\n";
     
-    std::vector<EvnetRecord> events = read_stream(file_name);
-    gen.generate_events(events, cfg.n_events);
+    std::vector<EventRecord> events = read_stream(file_name);
     std::cout << "Analysing" << file_name << "\n";
     StreamAnalyser analyser;
     StreamMeasurements m = analyser.analyse(events);
