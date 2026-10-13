@@ -61,7 +61,6 @@ int main(int argc, char** argv) {
         std::ofstream out("streams/" + stream_name + ".csv");
         if (!out) throw std::runtime_error("cannot open" + stream_name + ".csv");
         write_csv_header(out);
-        std::cout << "Benching " << stream_name << "\n";
 
         size_t n_warm = argc > 2 ? std::atoi(argv[2]) : 100'000;
      

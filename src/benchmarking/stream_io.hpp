@@ -178,7 +178,10 @@ inline std::pair<StreamConfig, StreamMeasurements> read_meta(const std::string& 
 void write_csv_header(std::ofstream& out) {
     out << "Stream Name,StreamConfig,seed,n_events,p_add,p_cancel,p_reduce,"
        "add_dist_lambda,cancel_dist_lambda,dist_scale_factor,occupied_level_range,"
-       "p_join,p_behind,p_improve,p_aggressive,StreamMeasurements,"
+       "p_join,p_behind,p_improve,p_aggressive,"
+       "StreamMeasurements,level_deletions,level_creations,average_gap,fills_per_add,"
+       "average_occupied_levels,max_live_orders,lowest_price,highest_price,avg_level_destruction_dist,"
+       "avg_level_creation_dist,bbos_deleted,"
        "ArrayBook,P50,P90,P99,P99.9,"
        "BitmapBook,P50,P90,P99,P99.9,"
        "HashBook,P50,P90,P99,P99.9,"
