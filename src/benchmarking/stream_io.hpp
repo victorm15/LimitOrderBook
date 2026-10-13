@@ -171,6 +171,7 @@ inline std::pair<StreamConfig, StreamMeasurements> read_meta(const std::string& 
     m.max_live_orders             = number<size_t>  (text, "max_live_orders",          path);
     m.lowest_price                = number<Price>   (text, "lowest_price",             path);
     m.highest_price               = number<Price>   (text, "highest_price",            path);
+    m.bbos_deleted                = number<uint32_t>(text, "bbos_deleted",             path);
  
     return {cfg, m};
 }
