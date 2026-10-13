@@ -6,7 +6,6 @@
 #include "../core/events.hpp"
 #include "../core/sinks.hpp"
 #include "../core/snapshot.hpp"
-#include <unordered_map>
 #include "../../third_party/unordered_dense.h"
 #include <vector>
 #include <cassert>
@@ -29,7 +28,6 @@ private:
     OrderArena arena_;
     Price base_price_;
     ankerl::unordered_dense::map<OrderId, Handle> id_to_handle_;
-    // std::unordered_map<OrderId, Handle> id_to_handle_;
 
     void push_back(Level& lvl, Handle h) {
         Order& o = arena_[h];

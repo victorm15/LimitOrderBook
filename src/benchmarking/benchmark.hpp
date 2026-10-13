@@ -98,7 +98,8 @@ template <typename Book> void benchmark(Book& book, std::string book_name, std::
 
     run_untimed(book, events, n_events, n_warm);
     run_timed(book, events, n_events, n_warm, book_timings, pmc);
-    std::cout << book_name << ":\n" << "best bid: " << book.best_bid() << " best ask: " << book.best_ask() << "\n";
+    volatile Price best_bid = book.best_bid();
+    volatile Price best_ask = book.best_ask();
 
     for (uint32_t& t : book_timings) t = (t > timer_overhead) ? t - timer_overhead : 0;
     std::sort(book_timings.begin(), book_timings.end());
@@ -111,5 +112,25 @@ template <typename Book> void benchmark(Book& book, std::string book_name, std::
     << " max: " << book_timings.back()
     << "\n-----------------------\n";
 }
+
+template <typename Book> void benchmark_to_csv(Book& book, std::string book_name, std::vector<EventRecord>& events, 
+    std::vector<uint32_t>& book_timings, size_t n_warm, size_t n_events, uint32_t timer_overhead, PmcCycles& pmc, std::ofstream& out) {
+
+    run_untimed(book, events, n_events, n_warm);
+    run_timed(book, events, n_events, n_warm, book_timings, pmc);
+    volatile Price best_bid = book.best_bid();
+    volatile Price best_ask = book.best_ask();
+
+    for (uint32_t& t : book_timings) t = (t > timer_overhead) ? t - timer_overhead : 0;
+    std::sort(book_timings.begin(), book_timings.end());
+
+    out << ',' 
+    << book_timings[size_t((book_timings.size()-1)*0.5)] << ','
+    << book_timings[size_t((book_timings.size()-1)*0.9)] << ','
+    << book_timings[size_t((book_timings.size()-1)*0.99)] << ','
+    << book_timings[size_t((book_timings.size()-1)*0.99)] << ','
+    << book_timings.back() << ',';
+}
+
 
 #endif

@@ -9,7 +9,6 @@
 #include "../../third_party/unordered_dense.h"
 #include <vector>
 #include <cassert>
-#include <unordered_map>
 #include <algorithm>
 
 
@@ -24,10 +23,8 @@ private:
         
     };
     ankerl::unordered_dense::map<Price, Level> bids_, asks_;
-    // std::unordered_map<Price, Level> bids_, asks_;
     mutable std::vector<Price> bid_heap_, ask_heap_;
     ankerl::unordered_dense::map<OrderId, Handle> id_to_handle_;
-    // std::unordered_map<OrderId, Handle> id_to_handle_;
     OrderArena arena_;
 
     void push_back(Level& lvl, Handle h) {

@@ -2,7 +2,6 @@
 #define STREAM_GENERATOR_H
 
 #include <random>
-#include <unordered_map>
 #include <cassert>
 #include <cmath>
 #include "../core/types.hpp"
@@ -28,20 +27,20 @@ private:
     // Add Order
     int p_improve_ = 10, p_join_ = 10, p_behind_ = 75; // p_aggressive = 5
     
-    std::unordered_map<Quantity,int> passive_add_qty_distribution_ = {{0,29},{100,58},
+    ankerl::unordered_dense::map<Quantity,int> passive_add_qty_distribution_ = {{0,29},{100,58},
     {200,8},{300,3},{400,2}}; // 0-50, then only round numbers
-    std::unordered_map<Quantity,int> aggressive_add_qty_distribution_ = {{0,36},{50,12},{100,37},{150,2},{200,7},{250,5},{300,1}};
+    ankerl::unordered_dense::map<Quantity,int> aggressive_add_qty_distribution_ = {{0,36},{50,12},{100,37},{150,2},{200,7},{250,5},{300,1}};
     // Probability of having a round number within a range (e.g. 100 for the range [100,150[ )
     int p_round_aggressive_add_ = 85;
     // How deep should aggressive orders cross
     int p_at_contra_best_ = 85, p_one_tick_ = 10; // p_two_ticks_ = 5;
     // Distance from best price for adds behind the best price
-    std::unordered_map<Price,double> behind_add_dist_distribution_ = {{1,7.0},{2,7.0},{3,5.0},{4,5.0},{5,6.0},{6,6.0},{7,7.0},{8,7.0},
+    ankerl::unordered_dense::map<Price,double> behind_add_dist_distribution_ = {{1,7.0},{2,7.0},{3,5.0},{4,5.0},{5,6.0},{6,6.0},{7,7.0},{8,7.0},
     {9,8.0},{10,9.0},{11,11.0},{12,8.0},{13,6.0},{14,5.0},{15,3.0}};
     int dist_scale_factor_ = 1; // book sparsity/density
 
     // Cancel Order
-    std::unordered_map<Price, double> cancel_dist_distribution_ = {{0,15.0},{1,6.0},{2,5.0},{3,5.0},{4,5.0},{5,5.0},{6,5.0},{7,7.0},
+    ankerl::unordered_dense::map<Price, double> cancel_dist_distribution_ = {{0,15.0},{1,6.0},{2,5.0},{3,5.0},{4,5.0},{5,5.0},{6,5.0},{7,7.0},
     {8,7.0},{9,7.0},{10,7.0},{11,7.0},{12,6.0},{13,5.0},{14,3.0},{15,2.0},{16,1.0},{17,1.0},{18,1.0}};
 
     // Reduce Order (at 2%, we very roughly model reduce events)

@@ -3,7 +3,6 @@
 
 
 #include <map>
-#include <unordered_map>
 #include <cassert>
 #include "../books/ref_book.hpp"
 #include "../core/events.hpp"
@@ -31,7 +30,7 @@ private:
     uint32_t bbos_deleted;
 
     std::map<Price, uint32_t> bids_, asks_;
-    std::unordered_map<OrderId, OrderData> live_;
+    ankerl::unordered_dense::map<OrderId, OrderData> live_;
 
     size_t max_live_orders_ = 0;
 

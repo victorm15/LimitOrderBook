@@ -175,4 +175,48 @@ inline std::pair<StreamConfig, StreamMeasurements> read_meta(const std::string& 
     return {cfg, m};
 }
 
+void write_csv_header(std::ofstream& out) {
+    out << "Stream Name,StreamConfig,seed,n_events,p_add,p_cancel,p_reduce,"
+       "add_dist_lambda,cancel_dist_lambda,dist_scale_factor,occupied_level_range,"
+       "p_join,p_behind,p_improve,p_aggressive,StreamMeasurements,"
+       "ArrayBook,P50,P90,P99,P99.9,"
+       "BitmapBook,P50,P90,P99,P99.9,"
+       "HashBook,P50,P90,P99,P99.9,"
+       "SortedVecBook,P50,P90,P99,P99.9\n";
+}
+
+void write_stream_cfg(StreamConfig& cfg, std::ofstream& out) {
+    out << ','
+    << cfg.seed << ','
+    << cfg.n_events << ','
+    << cfg.p_add << ','
+    << cfg.p_cancel << ','
+    << cfg.p_reduce << ','
+    << cfg.add_dist_lambda << ','
+    << cfg.cancel_dist_lambda << ','
+    << cfg.dist_scale_factor << ','
+    << cfg.occupied_level_range << ','
+    << cfg.p_join << ','
+    << cfg.p_behind << ','
+    << cfg.p_improve << ','
+    << 100 - cfg.p_join - cfg.p_behind - cfg.p_improve << ',';
+}
+
+void write_stream_measurements(StreamMeasurements& m, std::ofstream& out) {
+    out << ','
+    << m.level_deletions << ','
+    << m.level_creations << ','
+    << m.average_gap << ','
+    << m.fills_per_add << ','
+    << m.average_occupied_levels << ','
+    << m.max_live_orders << ','
+    << m.lowest_price << ','
+    << m.highest_price << ','
+    << m.avg_level_destruction_dist << ','
+    << m.avg_level_construction_dist << ','
+    << m.bbos_deleted << ',';
+}
+
+
+
 #endif

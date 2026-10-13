@@ -21,22 +21,21 @@ int main(int argc, char** argv) {
         .arena_size = stream_m.max_live_orders + 50, 
         .number_of_levels = size_t(stream_m.highest_price - stream_m.lowest_price) 
         };
-    size_t n_events = stream_cfg.n_events;
     std::cout << "Benchmarking books on " << stream_name << ":\n";
-    std::vector<uint32_t> book_timings(n_events-n_warm, 0);
+    std::vector<uint32_t> book_timings(stream_cfg.n_events-n_warm, 0);
     PmcCycles pmc;
     pmc.open();
     uint32_t timer_overhead = measure_timer_overhead(pmc);
     std::cout << "Timer Overhead: " << timer_overhead << "\n";
 
     ArrayBook array_book(book_cfg);
-    benchmark(array_book, "ArrayBook", events, book_timings, n_warm, n_events, timer_overhead, pmc);
+    benchmark(array_book, "ArrayBook", events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc);
     SortedVecBook sorted_vec_book(book_cfg);
-    benchmark(sorted_vec_book, "SortedVecBook", events, book_timings, n_warm, n_events, timer_overhead, pmc);
+    benchmark(sorted_vec_book, "SortedVecBook", events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc);
     HashBook hash_book(book_cfg);
-    benchmark(hash_book, "HashBook", events, book_timings, n_warm, n_events, timer_overhead, pmc);
+    benchmark(hash_book, "HashBook", events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc);
     BitmapBook bitmap_book(book_cfg);
-    benchmark(bitmap_book, "BitmapBook", events, book_timings, n_warm, n_events, timer_overhead, pmc);
+    benchmark(bitmap_book, "BitmapBook", events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc);
     
     return 0;
 }

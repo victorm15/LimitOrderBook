@@ -8,7 +8,6 @@
 #include "../core/arena.hpp"
 #include "../../third_party/unordered_dense.h"
 #include <vector>
-#include <unordered_map>
 #include <cassert>
 
 class SortedVecBook {
@@ -26,7 +25,6 @@ private:
     std::vector<Level> bids_; // ascending
     std::vector<Level> asks_; // descending
     ankerl::unordered_dense::map<OrderId, Handle> id_to_handle_;
-    // std::unordered_map<OrderId, Handle> id_to_handle_;
     OrderArena arena_;
 
     void push_back(Level& lvl, Handle h) {
