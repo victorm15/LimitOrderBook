@@ -82,13 +82,13 @@ int main(int argc, char** argv) {
         write_stream_cfg(stream_cfg, out);
         write_stream_measurements(stream_m, out);
         ArrayBook array_book(book_cfg);
-        benchmark_to_csv(array_book, "ArrayBook", events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc);
+        benchmark_to_csv(array_book, "ArrayBook", events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, out);
         SortedVecBook sorted_vec_book(book_cfg);
-        benchmark_to_csv(sorted_vec_book, "SortedVecBook", events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc);
+        benchmark_to_csv(sorted_vec_book, "SortedVecBook", events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, out);
         HashBook hash_book(book_cfg);
-        benchmark_to_csv(hash_book, "HashBook", events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc);
+        benchmark_to_csv(hash_book, "HashBook", events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, out);
         BitmapBook bitmap_book(book_cfg);
-        benchmark_to_csv(bitmap_book, "BitmapBook", events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc);
+        benchmark_to_csv(bitmap_book, "BitmapBook", events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, out);
         out << "\n";
     }
 
