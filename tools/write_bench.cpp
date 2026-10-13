@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     std::string stream_name = argc > 1 ? argv[1] : "stream0";
 
     if (stream_name == "stream_lambda_sf_grid") {
-        std::ofstream out("streams/stream_lambda_sf_grid.csv")
+        std::ofstream out("streams/stream_lambda_sf_grid.csv");
         if (!out) throw std::runtime_error("cannot open stream_lambda_sf_grid.csv");
 
         write_csv_header(out);
