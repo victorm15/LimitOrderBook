@@ -128,7 +128,7 @@ template <typename Book> void benchmark_to_csv(Book& book, std::string book_name
     << book_timings[size_t((book_timings.size()-1)*0.5)] << ','
     << book_timings[size_t((book_timings.size()-1)*0.9)] << ','
     << book_timings[size_t((book_timings.size()-1)*0.99)] << ','
-    << book_timings[size_t((book_timings.size()-1)*0.99)] << ','
+    << book_timings[size_t((book_timings.size()-1)*0.999)] << ','
     << book_timings.back() << ',';
 }
 
