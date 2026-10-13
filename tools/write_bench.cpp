@@ -16,9 +16,8 @@ int main(int argc, char** argv) {
     if (stream_name == "stream_lambda_sf_grid") {
         std::ofstream out("streams/stream_lambda_sf_grid.csv");
         if (!out) throw std::runtime_error("cannot open stream_lambda_sf_grid.csv");
-
         write_csv_header(out);
-        std::cout << "Benching " << stream_name << "\n";
+        std::cout << "Writing streams/stream_lambda_sf_grid.csv\n";
 
         size_t n_warm = argc > 2 ? std::atoi(argv[2]) : 100'000;
 

@@ -27,7 +27,7 @@ private:
     std::vector<size_t> occupied_levels_;
     uint32_t sum_fills_ = 0;
     uint32_t sum_adds_ = 0;
-    uint32_t bbos_deleted;
+    uint32_t bbos_deleted = 0;
 
     std::map<Price, uint32_t> bids_, asks_;
     ankerl::unordered_dense::map<OrderId, OrderData> live_;
