@@ -182,10 +182,10 @@ void write_csv_header(std::ofstream& out) {
        "StreamMeasurements,level_deletions,level_creations,average_gap,fills_per_add,"
        "average_occupied_levels,max_live_orders,lowest_price,highest_price,avg_level_destruction_dist,"
        "avg_level_creation_dist,bbos_deleted,"
-       "ArrayBook,P50,P90,P99,P99.9,"
-       "BitmapBook,P50,P90,P99,P99.9,"
-       "HashBook,P50,P90,P99,P99.9,"
-       "SortedVecBook,P50,P90,P99,P99.9\n";
+       "ArrayBook,P50,P90,P99,P99.9,Max,"
+       "BitmapBook,P50,P90,P99,P99.9,Max,"
+       "HashBook,P50,P90,P99,P99.9,Max,"
+       "SortedVecBook,P50,P90,P99,P99.9,Max\n";
 }
 
 void write_stream_cfg(StreamConfig& cfg, std::ofstream& out) {
