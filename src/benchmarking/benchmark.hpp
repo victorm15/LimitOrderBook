@@ -84,8 +84,8 @@ template <typename Book> BenchTimestamps benchmark(BookConfig& cfg, std::vector<
         Book book(cfg);
         run_untimed(book, events, n_warm);
         run_timed(book, events, n_events, n_warm, book_timings, pmc);
-        asm volatile("" : : "r,m"(book.best_bid) : "memory");
-        asm volatile("" : : "r,m"(book.best_ask) : "memory");
+        asm volatile("" : : "r,m"(book.best_bid()) : "memory");
+        asm volatile("" : : "r,m"(book.best_ask()) : "memory");
 
         for (uint32_t& t : book_timings) t = (t > timer_overhead) ? t - timer_overhead : 0;
         std::sort(book_timings.begin(), book_timings.end());
