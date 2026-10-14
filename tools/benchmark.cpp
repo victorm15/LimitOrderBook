@@ -50,30 +50,29 @@ int main(int argc, char** argv) {
         pmc.open();
         uint32_t timer_overhead = measure_timer_overhead(pmc);
 
-        ArrayBook array_book(book_cfg);
         BenchTimestamps array_book_times = 
-        benchmark(array_book, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
+        benchmark<ArrayBook>(book_cfg, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
         write_bench_results(array_book_times, csv_out);
         std::cout << "Array Book:\n";
         print_bench_results(array_book_times);
+        book_timings.clear();
 
-        SortedVecBook sorted_vec_book(book_cfg);
         BenchTimestamps sorted_vec_book_times = 
-        benchmark(sorted_vec_book, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
+        benchmark<SortedVecBook>(book_cfg, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
         write_bench_results(sorted_vec_book_times, csv_out);
         std::cout << "Sorted Vec Book:\n";
         print_bench_results(sorted_vec_book_times);
+        book_timings.clear();
 
-        HashBook hash_book(book_cfg);
         BenchTimestamps hash_book_times = 
-        benchmark(hash_book, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
+        benchmark<HashBook>(book_cfg, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
         write_bench_results(hash_book_times, csv_out);
         std::cout << "Hash Book:\n";
         print_bench_results(hash_book_times);
+        book_timings.clear();
 
-        BitmapBook bitmap_book(book_cfg);
         BenchTimestamps bitmap_book_times = 
-        benchmark(bitmap_book, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
+        benchmark<BitmapBook>(book_cfg, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
         write_bench_results(bitmap_book_times, csv_out);
         std::cout << "Bitmap Book:\n";
         print_bench_results(bitmap_book_times);

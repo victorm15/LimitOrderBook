@@ -6,8 +6,9 @@
 #include "stream_io.hpp"
 #include "pmc_cycles.hpp"
 #include <string>
+#include <cassert>
 
-template <typename Book> void run_untimed(Book& book, std::vector<EventRecord>& events, size_t n_events, size_t n_warm) {
+template <typename Book> void run_untimed(Book& book, std::vector<EventRecord>& events, size_t n_warm) {
     for (size_t i = 0; i < n_warm; ++i) {
         switch(events[i].event_type) {
             case EventType::Add:
@@ -70,15 +71,18 @@ inline uint32_t measure_timer_overhead(PmcCycles& pmc, size_t n = 1'000'000) {
     return v[v.size() / 2];
 }
 
-template <typename Book> BenchTimestamps benchmark(Book& book, std::vector<EventRecord>& events, std::vector<uint32_t>& book_timings, 
+template <typename Book> BenchTimestamps benchmark(BookConfig& cfg, std::vector<EventRecord>& events, std::vector<uint32_t>& book_timings, 
     size_t n_warm, size_t n_events, uint32_t timer_overhead, PmcCycles& pmc, int trials) {
     
+    
+    assert(n_warm < n_events);
     std::vector<uint32_t> p50_ts;
     std::vector<uint32_t> p99_ts;
     std::vector<uint32_t> p999_ts;
     std::vector<uint32_t> max_ts;
     for (int i = 0; i < trials; ++i) {
-        run_untimed(book, events, n_events, n_warm);
+        Book book(cfg);
+        run_untimed(book, events, n_warm);
         run_timed(book, events, n_events, n_warm, book_timings, pmc);
         volatile Price best_bid = book.best_bid();
         volatile Price best_ask = book.best_ask();
