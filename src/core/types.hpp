@@ -10,9 +10,9 @@ using Quantity = std::uint32_t;
 using OrderId = std::uint64_t;
 using Handle = std::uint32_t;
 
-Handle NIL = std::numeric_limits<Handle>::max();
-Price NO_BID = std::numeric_limits<Price>::min();
-Price NO_ASK = std::numeric_limits<Price>::max();
+inline constexpr Handle NIL = std::numeric_limits<Handle>::max();
+inline constexpr Price NO_BID = std::numeric_limits<Price>::min();
+inline constexpr Price NO_ASK = std::numeric_limits<Price>::max();
 
 enum class Side : uint8_t { Buy, Sell };
 
@@ -66,7 +66,9 @@ struct StreamMeasurements {
 
 };
 
-
+struct BenchTimestamps {
+    uint32_t p50 = 0, p99 = 0, p999 = 0, max = 0;
+};
 
 
 

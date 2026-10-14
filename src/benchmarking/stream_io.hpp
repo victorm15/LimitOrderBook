@@ -95,16 +95,6 @@ inline std::vector<EventRecord> read_stream(const std::string& path) {
     return evs;
 }
 
-
-
-
-
-
-
-
-
-
-
 inline std::string field(const std::string& text, const std::string& key,
                          const std::string& path) {
     const std::string pat = "\"" + key + "\"";
@@ -128,7 +118,6 @@ inline std::string field(const std::string& text, const std::string& key,
     return v.substr(a, b - a + 1);
 }
 
-
 template <typename T>
 T number(const std::string& text, const std::string& key, const std::string& path) {
     const std::string v = field(text, key, path);
@@ -140,7 +129,6 @@ T number(const std::string& text, const std::string& key, const std::string& pat
     return out;
 }
  
-
 inline std::pair<StreamConfig, StreamMeasurements> read_meta(const std::string& path) {
     std::ifstream f(path);
     if (!f) throw std::runtime_error("cannot open " + path);
@@ -176,7 +164,7 @@ inline std::pair<StreamConfig, StreamMeasurements> read_meta(const std::string& 
     return {cfg, m};
 }
 
-void write_csv_header(std::ofstream& out) {
+void write_header(std::ofstream& out) {
     out << "Stream Name,StreamConfig,seed,n_events,p_add,p_cancel,p_reduce,"
        "add_dist_lambda,cancel_dist_lambda,dist_scale_factor,occupied_level_range,"
        "p_join,p_behind,p_improve,p_aggressive,"
@@ -189,7 +177,7 @@ void write_csv_header(std::ofstream& out) {
        "BitmapBook,P50,P90,P99,P99.9,Max\n";
 }
 
-void write_stream_cfg(StreamConfig& cfg, std::ofstream& out) {
+void write_stream_info(StreamConfig& cfg, StreamMeasurements& m, std::ofstream& out) {
     out << ','
     << cfg.seed << ','
     << cfg.n_events << ','
@@ -204,9 +192,7 @@ void write_stream_cfg(StreamConfig& cfg, std::ofstream& out) {
     << cfg.p_behind << ','
     << cfg.p_improve << ','
     << 100 - cfg.p_join - cfg.p_behind - cfg.p_improve << ',';
-}
-
-void write_stream_measurements(StreamMeasurements& m, std::ofstream& out) {
+    
     out << ','
     << m.level_deletions << ','
     << m.level_creations << ','
@@ -221,6 +207,14 @@ void write_stream_measurements(StreamMeasurements& m, std::ofstream& out) {
     << m.bbos_deleted << ',';
 }
 
+void write_bench_results(BenchTimestamps& ts, std::ofstream& out) {
+    out << ',' << ts.p50 << ',' 
+    << ts.p99 << ',' << ts.p999 << ',' << ts.max << ',';
+}
 
-
+void print_bench_results(BenchTimestamps& ts) {
+    std::cout << "P50: " << ts.p50
+    << " P99: " << ts.p99 << " P99.9: " 
+    << ts.p999 << " max: " << ts.max;
+}
 #endif

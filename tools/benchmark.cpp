@@ -1,0 +1,83 @@
+#include "../src/benchmarking/benchmark.hpp"
+#include "../src/benchmarking/stream_io.hpp"
+#include "../src/books/array_book.hpp"
+#include "../src/books/sorted_vec_book.hpp"
+#include "../src/books/hash_book.hpp"
+#include "../src/books/bitmap_book.hpp"
+#include <string>
+#include <numeric>
+
+int main(int argc, char** argv) {
+    
+    std::string stream_name = argc > 1 ? argv[1] : "stream0";
+    std::ofstream csv_out = argc > 2 ? std::ofstream("streams/" + argv[2] + ".csv") : std::ofstream("streams/results.csv");
+    int trials = arc > 3 ? std::atoi(argv[3]) : 3;
+    if (!csv_out) throw std::runtime_error("cannot open csv");
+    write_csv_header(csv_out);
+
+    std::vector<string> stream_names;
+    if (stream_name == "lambda_sf_grid") {
+        std::vector<double> dist_lambdas = {0.0, 0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5};
+        std::vector<int> scale_factors = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 100};
+        for (size_t r = 0; r < dist_lambdas.size(); ++r) {
+            for (size_t i = 0; i < scale_factors.size(); ++i) {
+                stream_names.push_back("streams/" + "stream_cdlsf_grid" + 
+                    std::to_string(int(dist_lambdas[r] * 100)) + 
+                    "-" + std::to_string(scale_factors[i]));
+            }
+        }
+    }
+    else stream_names.push_back("streams/" + stream_name);
+
+    for (size_t i = 0; i < stream_names.size(); ++i) {
+        std::cout << "Benching Stream " << stream_names[i] 
+        << "(" << i+1 << "/" << stream_names.size() << ")" << "...\n";
+
+        std::vector<EventRecord> events = read_stream(stream_names[i] + ".bin");
+        prefault(events);
+        auto [stream_cfg, stream_m] = read_meta(stream_names[i] + ".json");
+        BookConfig book_cfg{.base_price = stream_m.lowest_price, .band_ticks = stream_m.highest_price - stream_m.lowest_price + 1,
+            .arena_size = stream_m.max_live_orders + 50, 
+            .number_of_levels = size_t(stream_m.highest_price - stream_m.lowest_price) 
+            };
+
+        csv_out << stream_names[i] << ',';
+        write_stream_info(stream_cfg, stream_m, csv_out);
+
+        std::vector<uint32_t> book_timings(stream_cfg.n_events-n_warm, 0);
+        PmcCycles pmc;
+        pmc.open();
+        uint32_t timer_overhead = measure_timer_overhead(pmc);
+
+        ArrayBook array_book(book_cfg);
+        BenchTimestamps array_book_times = 
+        benchmark(sorted_vec_book, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
+        write_bench_results(array_book_times, csv_out);
+        std::cout << "Array Book:\n";
+        print_bench_results(array_book_times);
+
+        SortedVecBook sorted_vec_book(book_cfg);
+        BenchTimestamps sorted_vec_book_times = 
+        benchmark(sorted_vec_book, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
+        write_bench_results(sorted_vec_book_times, csv_out);
+        std::cout << "Sorted Vec Book:\n";
+        print_bench_results(sorted_vec_book_times);
+
+        HashBook hash_book(book_cfg);
+        BenchTimestamps hash_book_times = 
+        benchmark(hash_book, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
+        write_bench_results(hash_book_times, csv_out);
+        std::cout << "Hash Book:\n";
+        print_bench_results(hash_book_times);
+
+        BitmapBook bitmap_book(book_cfg);
+        BenchTimestamps bitmap_book_times = 
+        benchmark(bitmap_book, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
+        write_bench_results(bitmap_book_times, csv_out);
+        std::cout << "Bitmap Book:\n";
+        print_bench_results(bitmap_book_times);
+        out << "\n";
+
+    }
+    return 0;
+}

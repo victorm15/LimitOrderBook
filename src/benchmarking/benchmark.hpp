@@ -7,17 +7,6 @@
 #include "pmc_cycles.hpp"
 #include <string>
 
-// #if defined(__x86_64__)
-//     #include <x86intrin.h>
-// #endif
-
-// static inline uint64_t get_tsc() {
-//     unsigned aux;
-//     uint64_t t = __rdtscp(&aux);
-//     _mm_lfence();
-//     return t;
-// }
-
 template <typename Book> void run_untimed(Book& book, std::vector<EventRecord>& events, size_t n_events, size_t n_warm) {
     for (size_t i = 0; i < n_warm; ++i) {
         switch(events[i].event_type) {
@@ -42,34 +31,25 @@ std::vector<uint32_t>& cycles, PmcCycles& pmc) {
         switch(events[i].event_type) {
             case EventType::Add: {
                 Add a{events[i].id, events[i].price, events[i].quantity, events[i].side};
-                // uint64_t before = get_tsc();
                 uint64_t before = pmc.read();
                 book.add(a, NullSink{});
-                // uint64_t after = get_tsc();
                 uint64_t after = pmc.read();
-                // cycles[i - n_warm] = uint32_t(after - before); 
                 cycles[i - n_warm] = uint32_t(pmc.delta(before, after));
                 break;
             }
             case EventType::Cancel: {
                 Cancel c{events[i].id};
-                // uint64_t before = get_tsc();
                 uint64_t before = pmc.read();
                 book.cancel(c);
-                // uint64_t after = get_tsc();
                 uint64_t after = pmc.read();
-                // cycles[i - n_warm] = uint32_t(after - before); 
                 cycles[i - n_warm] = uint32_t(pmc.delta(before, after));
                 break;
             }   
             case EventType::Reduce: {
                 Reduce r{events[i].id, events[i].quantity};
-                // uint64_t before = get_tsc();
                 uint64_t before = pmc.read();
                 book.reduce(r);
-                // uint64_t after = get_tsc();
                 uint64_t after = pmc.read();
-                // cycles[i - n_warm] = uint32_t(after - before); 
                 cycles[i - n_warm] = uint32_t(pmc.delta(before, after));
                 break;
             }
@@ -82,9 +62,6 @@ std::vector<uint32_t>& cycles, PmcCycles& pmc) {
 inline uint32_t measure_timer_overhead(PmcCycles& pmc, size_t n = 1'000'000) {
     std::vector<uint32_t> v(n);
     for (size_t i = 0; i < n; ++i) {
-        // const uint64_t t0 = get_tsc();
-        // const uint64_t t1 = get_tsc();
-        // v[i] = uint32_t(t1 - t0);
         const uint64_t t0 = pmc.read();
         const uint64_t t1 = pmc.read();
         v[i] = uint32_t(pmc.delta(t0, t1));
@@ -93,43 +70,39 @@ inline uint32_t measure_timer_overhead(PmcCycles& pmc, size_t n = 1'000'000) {
     return v[v.size() / 2];
 }
 
-template <typename Book> void benchmark(Book& book, std::string book_name, std::vector<EventRecord>& events, 
-    std::vector<uint32_t>& book_timings, size_t n_warm, size_t n_events, uint32_t timer_overhead, PmcCycles& pmc) {
+template <typename Book> BenchTimestamps benchmark(Book& book, std::vector<EventRecord>& events, std::vector<uint32_t>& book_timings, 
+    size_t n_warm, size_t n_events, uint32_t timer_overhead, PmcCycles& pmc, int trials) {
+    
+    std::vector<uint32_t> p50_ts;
+    std::vector<uint32_t> p99_ts;
+    std::vector<uint32_t> p999_ts;
+    std::vector<uint32_t> max_ts;
+    for (int i = 0; i < trials, ++i) {
+        run_untimed(book, events, n_events, n_warm);
+        run_timed(book, events, n_events, n_warm, book_timings, pmc);
+        volatile Price best_bid = book.best_bid();
+        volatile Price best_ask = book.best_ask();
 
-    run_untimed(book, events, n_events, n_warm);
-    run_timed(book, events, n_events, n_warm, book_timings, pmc);
-    volatile Price best_bid = book.best_bid();
-    volatile Price best_ask = book.best_ask();
+        for (uint32_t& t : book_timings) t = (t > timer_overhead) ? t - timer_overhead : 0;
+        std::sort(book_timings.begin(), book_timings.end());
 
-    for (uint32_t& t : book_timings) t = (t > timer_overhead) ? t - timer_overhead : 0;
-    std::sort(book_timings.begin(), book_timings.end());
+        p50_ts.push_back(book_timings[size_t((book_timings.size()-1)*0.5)]);
+        p99_ts.push_back(book_timings[size_t((book_timings.size()-1)*0.99)]);
+        p999_ts.push_back(book_timings[size_t((book_timings.size()-1)*0.999)]);
+        max_ts.push_back(book_timings.back());
+    }
+    std::nth_element(p50_ts.begin(), p50_ts.begin() + p50_ts.size()/2, p50_ts.end()); 
+    std::nth_element(p99_ts.begin(), p99_ts.begin() + p99_ts.size()/2, p99_ts.end()); 
+    std::nth_element(p999_ts.begin(), p999_ts.begin() + p999_ts.size()/2, p999_ts.end()); 
+    std::nth_element(max_ts.begin(), max_ts.begin() + max_ts.size()/2, max_ts.end()); 
 
-
-    std::cout << "p50: " << book_timings[size_t((book_timings.size()-1)*0.5)] 
-    << " p90: " << book_timings[size_t((book_timings.size()-1)*0.9)] 
-    << " p99: " << book_timings[size_t((book_timings.size()-1)*0.99)] 
-    << " p99.9: " << book_timings[size_t((book_timings.size()-1)*0.999)] 
-    << " max: " << book_timings.back()
-    << "\n-----------------------\n";
-}
-
-template <typename Book> void benchmark_to_csv(Book& book, std::string book_name, std::vector<EventRecord>& events, 
-    std::vector<uint32_t>& book_timings, size_t n_warm, size_t n_events, uint32_t timer_overhead, PmcCycles& pmc, std::ofstream& out) {
-
-    run_untimed(book, events, n_events, n_warm);
-    run_timed(book, events, n_events, n_warm, book_timings, pmc);
-    volatile Price best_bid = book.best_bid();
-    volatile Price best_ask = book.best_ask();
-
-    for (uint32_t& t : book_timings) t = (t > timer_overhead) ? t - timer_overhead : 0;
-    std::sort(book_timings.begin(), book_timings.end());
-
-    out << ',' 
-    << book_timings[size_t((book_timings.size()-1)*0.5)] << ','
-    << book_timings[size_t((book_timings.size()-1)*0.9)] << ','
-    << book_timings[size_t((book_timings.size()-1)*0.99)] << ','
-    << book_timings[size_t((book_timings.size()-1)*0.999)] << ','
-    << book_timings.back() << ',';
+    return BenchTimestamps{
+        .p50 = p50_ts[p50_ts.size()/2]
+        .p99 = p99_ts[p99_ts.size()/2]
+        .p999 = p999_ts[p999_ts.size()/2]
+        .max = max_ts[max_ts.size()/2]
+    };
+    
 }
 
 

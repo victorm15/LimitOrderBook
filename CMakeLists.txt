@@ -6,12 +6,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
 add_library(lob INTERFACE)
 target_include_directories(lob INTERFACE src)
+target_compile_options(lob INTERFACE -Wall -Wextra -march=native)
 
-foreach(t bench generate_stream differential_test analyse_stream write_bench)
+foreach(t benchmark generate_stream differential_test)
   add_executable(${t} tools/${t}.cpp)
   target_link_libraries(${t} PRIVATE lob)
 endforeach()
-
-target_compile_options(bench PRIVATE -O3 -march=native)

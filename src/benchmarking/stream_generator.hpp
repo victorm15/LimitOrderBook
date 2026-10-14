@@ -290,12 +290,6 @@ public:
             if(add_reduce_event(events)) ++i;
         }
     }
-
-    
-
-
-
-
 };
 
 
