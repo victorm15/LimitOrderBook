@@ -215,6 +215,6 @@ void write_bench_results(BenchTimestamps& ts, std::ofstream& out) {
 void print_bench_results(BenchTimestamps& ts) {
     std::cout << "P50: " << ts.p50
     << " P99: " << ts.p99 << " P99.9: " 
-    << ts.p999 << " max: " << ts.max;
+    << ts.p999 << " max: " << ts.max << "\n";
 }
 #endif
