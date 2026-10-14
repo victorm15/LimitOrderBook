@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     else stream_names.push_back("streams/" + stream_name);
 
     for (size_t i = 0; i < stream_names.size(); ++i) {
-        std::cout << "Benching Stream " << stream_names[i] 
+        std::cout << "\nBenching Stream " << stream_names[i] 
         << "(" << i+1 << "/" << stream_names.size() << ")" << "...\n";
 
         std::vector<EventRecord> events = read_stream(stream_names[i] + ".bin");
