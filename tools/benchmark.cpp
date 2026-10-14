@@ -55,21 +55,18 @@ int main(int argc, char** argv) {
         write_bench_results(array_book_times, csv_out);
         std::cout << "Array Book:\n";
         print_bench_results(array_book_times);
-        book_timings.clear();
 
         BenchTimestamps sorted_vec_book_times = 
         benchmark<SortedVecBook>(book_cfg, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
         write_bench_results(sorted_vec_book_times, csv_out);
         std::cout << "Sorted Vec Book:\n";
         print_bench_results(sorted_vec_book_times);
-        book_timings.clear();
 
         BenchTimestamps hash_book_times = 
         benchmark<HashBook>(book_cfg, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
         write_bench_results(hash_book_times, csv_out);
         std::cout << "Hash Book:\n";
         print_bench_results(hash_book_times);
-        book_timings.clear();
 
         BenchTimestamps bitmap_book_times = 
         benchmark<BitmapBook>(book_cfg, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
