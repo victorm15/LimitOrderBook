@@ -13,15 +13,15 @@ int main(int argc, char** argv) {
         std::vector<int> scale_factors = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 100};
         for (size_t r = 0; r < dist_lambdas.size(); ++r) {
             for (size_t i = 0; i < scale_factors.size(); ++i) {
-                cfgs.push_back(StreamConfig{.dist_scale_factor = dist_lambdas[r], 
-                    .cancel_dist_lambda = scale_factors[i]});
+                cfgs.push_back(StreamConfig{.cancel_dist_lambda = dist_lambdas[r],
+                    .dist_scale_factor = scale_factors[i]});
                 stream_names.push_back("stream_cdlsf_grid" + std::to_string(int(dist_lambdas[r] * 100)) + 
                 "-" + std::to_string(scale_factors[i]));
             }
         }
     }
     else {
-        cfgs.push_back(Streamconfig{});
+        cfgs.push_back(StreamConfig{});
         stream_names.push_back("stream0");
     }
     for (size_t i = 0; i < cfgs.size(); ++i) {

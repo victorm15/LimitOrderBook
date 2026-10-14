@@ -14,6 +14,7 @@ int main(int argc, char** argv) {
     int trials = argc > 3 ? std::atoi(argv[3]) : 3;
     if (!csv_out) throw std::runtime_error("cannot open csv");
     write_csv_header(csv_out);
+    size_t n_warm = 100'000;
 
     std::vector<std::string> stream_names;
     if (stream_name == "lambda_sf_grid") {
@@ -21,7 +22,7 @@ int main(int argc, char** argv) {
         std::vector<int> scale_factors = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 100};
         for (size_t r = 0; r < dist_lambdas.size(); ++r) {
             for (size_t i = 0; i < scale_factors.size(); ++i) {
-                stream_names.push_back("streams/" + "stream_cdlsf_grid" + 
+                stream_names.push_back("streams/stream_cdlsf_grid" + 
                     std::to_string(int(dist_lambdas[r] * 100)) + 
                     "-" + std::to_string(scale_factors[i]));
             }
@@ -51,7 +52,7 @@ int main(int argc, char** argv) {
 
         ArrayBook array_book(book_cfg);
         BenchTimestamps array_book_times = 
-        benchmark(sorted_vec_book, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
+        benchmark(array_book, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
         write_bench_results(array_book_times, csv_out);
         std::cout << "Array Book:\n";
         print_bench_results(array_book_times);
@@ -76,7 +77,7 @@ int main(int argc, char** argv) {
         write_bench_results(bitmap_book_times, csv_out);
         std::cout << "Bitmap Book:\n";
         print_bench_results(bitmap_book_times);
-        out << "\n";
+        csv_out << "\n";
 
     }
     return 0;
