@@ -77,7 +77,7 @@ template <typename Book> BenchTimestamps benchmark(Book& book, std::vector<Event
     std::vector<uint32_t> p99_ts;
     std::vector<uint32_t> p999_ts;
     std::vector<uint32_t> max_ts;
-    for (int i = 0; i < trials, ++i) {
+    for (int i = 0; i < trials; ++i) {
         run_untimed(book, events, n_events, n_warm);
         run_timed(book, events, n_events, n_warm, book_timings, pmc);
         volatile Price best_bid = book.best_bid();
@@ -97,9 +97,9 @@ template <typename Book> BenchTimestamps benchmark(Book& book, std::vector<Event
     std::nth_element(max_ts.begin(), max_ts.begin() + max_ts.size()/2, max_ts.end()); 
 
     return BenchTimestamps{
-        .p50 = p50_ts[p50_ts.size()/2]
-        .p99 = p99_ts[p99_ts.size()/2]
-        .p999 = p999_ts[p999_ts.size()/2]
+        .p50 = p50_ts[p50_ts.size()/2],
+        .p99 = p99_ts[p99_ts.size()/2],
+        .p999 = p999_ts[p999_ts.size()/2],
         .max = max_ts[max_ts.size()/2]
     };
     

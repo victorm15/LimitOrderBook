@@ -10,8 +10,8 @@
 int main(int argc, char** argv) {
     
     std::string stream_name = argc > 1 ? argv[1] : "stream0";
-    std::ofstream csv_out = argc > 2 ? std::ofstream("streams/" + argv[2] + ".csv") : std::ofstream("streams/results.csv");
-    int trials = arc > 3 ? std::atoi(argv[3]) : 3;
+    std::ofstream csv_out = argc > 2 ? std::ofstream("streams/" + std::string(argv[2]) + ".csv") : std::ofstream("streams/results.csv");
+    int trials = argc > 3 ? std::atoi(argv[3]) : 3;
     if (!csv_out) throw std::runtime_error("cannot open csv");
     write_csv_header(csv_out);
 

@@ -164,7 +164,7 @@ inline std::pair<StreamConfig, StreamMeasurements> read_meta(const std::string& 
     return {cfg, m};
 }
 
-void write_header(std::ofstream& out) {
+void write_csv_header(std::ofstream& out) {
     out << "Stream Name,StreamConfig,seed,n_events,p_add,p_cancel,p_reduce,"
        "add_dist_lambda,cancel_dist_lambda,dist_scale_factor,occupied_level_range,"
        "p_join,p_behind,p_improve,p_aggressive,"
