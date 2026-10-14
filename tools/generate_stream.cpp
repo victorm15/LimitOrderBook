@@ -6,7 +6,7 @@
 int main(int argc, char** argv) {
     std::string stream_name = argc > 1 ? argv[1] : "stream0";
     std::vector<StreamConfig> cfgs;
-    std::vector<string> stream_names;
+    std::vector<std::string> stream_names;
 
     if (stream_name == "lambda_sf_grid") {
         std::vector<double> dist_lambdas = {0.0, 0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5};
