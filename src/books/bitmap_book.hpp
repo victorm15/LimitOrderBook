@@ -29,7 +29,7 @@ private:
     Price base_price_;
     ankerl::unordered_dense::map<OrderId, Handle> id_to_handle_;
     #ifdef BOOK_STATS
-        uint64_t scans = 0, scan_ticks = 0, scan_words = 0;
+        mutable uint64_t scans = 0, scan_ticks = 0, scan_words = 0;
     #endif
 
     void push_back(Level& lvl, Handle h) {

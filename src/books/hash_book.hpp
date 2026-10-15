@@ -27,8 +27,8 @@ private:
     ankerl::unordered_dense::map<OrderId, Handle> id_to_handle_;
     OrderArena arena_;
     #ifdef BOOK_STATS
-        uint64_t best_calls = 0, lazy_deletions = 0, max_lazy_deletions = 0;
-        uint64_t max_heap_size = 0;
+        mutable uint64_t best_calls = 0, lazy_deletions = 0, max_lazy_deletions = 0;
+        mutable uint64_t max_heap_size = 0;
     #endif
 
     void push_back(Level& lvl, Handle h) {

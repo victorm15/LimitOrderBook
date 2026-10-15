@@ -27,8 +27,8 @@ private:
     ankerl::unordered_dense::map<OrderId, Handle> id_to_handle_;
     OrderArena arena_;
     #ifdef BOOK_STATS
-        uint64_t searches = 0, search_steps = 0;
-        uint64_t shifts = 0, shifted_elements = 0;
+        mutable uint64_t searches = 0, search_steps = 0;
+        mutable uint64_t shifts = 0, shifted_elements = 0;
     #endif
 
     void push_back(Level& lvl, Handle h) {
