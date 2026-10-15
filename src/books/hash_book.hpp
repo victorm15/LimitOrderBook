@@ -269,7 +269,7 @@ public:
             return HashBookStats{
                 .best_calls = best_calls, 
                 .lazy_deletions = lazy_deletions,
-                .max_lazy_deletions = max_lazy_deletions
+                .max_lazy_deletions = max_lazy_deletions,
                 .max_heap_size = max_heap_size
             };
         }
