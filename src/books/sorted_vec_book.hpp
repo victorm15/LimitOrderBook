@@ -26,6 +26,10 @@ private:
     std::vector<Level> asks_; // descending
     ankerl::unordered_dense::map<OrderId, Handle> id_to_handle_;
     OrderArena arena_;
+    #ifdef BOOK_STATS
+        uint64_t searches = 0, search_steps = 0;
+        uint64_t shifts = 0, shifted_elements = 0;
+    #endif
 
     void push_back(Level& lvl, Handle h) {
         Order& o = arena_[h];
@@ -60,13 +64,18 @@ private:
         lvl.total_quantity -= o.quantity;
     }
 
-    // asserts level of that price exists
     size_t index_at_price(Side side, Price price) const { 
+        #ifdef BOOK_STATS
+            ++searches;
+        #endif
         size_t lo = 0;
         bool is_buy = side == Side::Buy;
         size_t hi = is_buy ? bids_.size() : asks_.size();
         const std::vector<Level>& vec = is_buy ? bids_ : asks_;
         while(true) {
+            #ifdef BOOK_STATS
+                ++search_steps;
+            #endif 
             if (lo == hi) return NOT_FOUND;
             size_t mid = lo + (hi-lo)/2;
             if (vec[mid].price == price) return mid;
@@ -88,6 +97,10 @@ private:
             id_to_handle_.erase(o.id);
             unlink(lvl, h);
             if (lvl.total_orders == 0) {
+                #ifdef BOOK_STATS
+                    ++shifts;
+                    shifted_elements += bids_.size()-lvl_idx-1;
+                #endif
                 if (is_buy) bids_.erase(bids_.begin() + lvl_idx); 
                 else asks_.erase(asks_.begin() + lvl_idx);
             }
@@ -106,15 +119,25 @@ private:
     }
 
     void insert_order(Order& o, Handle h) {
+        #ifdef BOOK_STATS
+            ++searches;
+        #endif
         size_t lo = 0;
         bool is_buy = o.side == Side::Buy;
         size_t hi = is_buy ? bids_.size() : asks_.size();
         std::vector<Level>& vec = is_buy ? bids_ : asks_;
         while(true) {
+            #ifdef BOOK_STATS
+                ++search_steps;
+            #endif
             if (lo == hi) {
                 // Level doesn't exist
                 o.next = NIL;
                 o.prev = NIL;
+                #ifdef BOOK_STATS
+                    ++shifts;
+                    shifted_elements += vec.size()-lo;
+                #endif
                 vec.insert(vec.begin() + lo, Level{o.price, h, h, o.quantity, 1});
                 return;
             }
@@ -239,6 +262,23 @@ public:
         }
     }
 
+    #ifdef BOOK_STATS
+        SortedVecBookStats get_stats() const {
+            return SortedVecBookStats{
+                .searches = searches,
+                .search_steps = search_steps,
+                .shifts = shifts,
+                .shifted_elements = shifted_elements
+            };
+        }
+
+        void reset_stats() {
+            searches = 0;
+            search_steps = 0;
+            shifts = 0;
+            shifted_elements = 0;
+        }
+    #endif
 
 };
 

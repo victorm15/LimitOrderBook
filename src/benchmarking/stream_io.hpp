@@ -164,20 +164,20 @@ inline std::pair<StreamConfig, StreamMeasurements> read_meta(const std::string& 
     return {cfg, m};
 }
 
-void write_csv_header(std::ofstream& out) {
+inline void write_bench_csv_header(std::ofstream& out) {
     out << "Stream Name,StreamConfig,seed,n_events,p_add,p_cancel,p_reduce,"
        "add_dist_lambda,cancel_dist_lambda,dist_scale_factor,occupied_level_range,"
        "p_join,p_behind,p_improve,p_aggressive,"
        "StreamMeasurements,level_deletions,level_creations,average_gap,fills_per_add,"
        "average_occupied_levels,max_live_orders,lowest_price,highest_price,avg_level_destruction_dist,"
        "avg_level_creation_dist,bbos_deleted,"
-       "ArrayBook,P50,P90,P99,P99.9,Max,"
-       "SortedVecBook,P50,P90,P99,P99.9,Max,"
-       "HashBook,P50,P90,P99,P99.9,Max,"
-       "BitmapBook,P50,P90,P99,P99.9,Max\n";
+       "ArrayBook,P50,P99,P99.9,Max,Mean,"
+       "SortedVecBook,P50,P99,P99.9,Max,Mean,"
+       "HashBook,P50,P99,P99.9,Max,Mean,"
+       "BitmapBook,P50,P99,P99.9,Max\n";
 }
 
-void write_stream_info(StreamConfig& cfg, StreamMeasurements& m, std::ofstream& out) {
+inline void write_stream_info(StreamConfig& cfg, StreamMeasurements& m, std::ofstream& out) {
     out << ','
     << cfg.seed << ','
     << cfg.n_events << ','
@@ -207,14 +207,39 @@ void write_stream_info(StreamConfig& cfg, StreamMeasurements& m, std::ofstream& 
     << m.bbos_deleted << ',';
 }
 
-void write_bench_results(BenchTimestamps& ts, std::ofstream& out) {
-    out << ',' << ts.p50 << ',' 
-    << ts.p99 << ',' << ts.p999 << ',' << ts.max << ',';
+inline void write_bench_results(BenchTimestamps& ts, std::ofstream& out) {
+    out << ',' << ts.p50 << ',' << ts.p99 << ',' 
+    << ts.p999 << ',' << ts.max << ',' << ts.mean << ',';
 }
 
-void print_bench_results(BenchTimestamps& ts) {
+inline void print_bench_results(BenchTimestamps& ts) {
     std::cout << "P50: " << ts.p50
     << " P99: " << ts.p99 << " P99.9: " 
-    << ts.p999 << " max: " << ts.max << "\n";
+    << ts.p999 << " max: " << ts.max  << " mean: " << ts.mean << "\n";
 }
+
+#ifdef BOOK_STATS
+    inline void write_stats_csv_header(std::ofstream& out) {
+        out << "StreamName,ArrayBook scans,ArrayBook scan_ticks,"
+        << "BitmapBook scans,BitmapBook scan_ticks,BitmapBook scan_words,"
+        << "HashBook best_calls,HashBook lazy_deletions,HashBook max_lazy_deletions,HashBook max_heap_size,"
+        << "SortedVecBook searches,SortedVecBook search_steps,SortedVecBook shifts,SortedVecBook shifted_elements\n";
+    }
+
+    inline void write_stats(std::ofstream& out, ArrayBookStats& stats) {
+        out << stats.scans << ',' << stats.scan_ticks << ',';
+    }
+    inline void write_stats(std::ofstream& out, BitmapBookStats& stats) {
+        out << stats.scans << ',' << stats.scan_ticks << ','
+        << stats.scan_words << ',';
+    }
+    inline void write_stats(std::ofstream& out, HashBookStats& stats) {
+        out << stats.best_calls << ',' << stats.lazy_deletions << ','
+        << stats.max_lazy_deletions << ',' << stats.max_heap_size << ',';
+    }
+    inline void write_stats(std::ofstream& out, SortedVecBookStats& stats) {
+        out << stats.searches << ',' << stats.search_steps << ','
+        << stats.shifts << ',' << stats.shifted_elements;
+    }
+#endif
 #endif

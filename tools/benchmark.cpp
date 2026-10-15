@@ -10,10 +10,10 @@
 int main(int argc, char** argv) {
     
     std::string stream_name = argc > 1 ? argv[1] : "stream0";
-    std::ofstream csv_out = argc > 2 ? std::ofstream("streams/" + std::string(argv[2]) + ".csv") : std::ofstream("streams/results.csv");
-    int trials = argc > 3 ? std::atoi(argv[3]) : 3;
+    std::ofstream csv_out("streams/" + stream_name + "_results.csv");
+    int trials = argc > 2 ? std::atoi(argv[2]) : 3;
     if (!csv_out) throw std::runtime_error("cannot open csv");
-    write_csv_header(csv_out);
+    write_bench_csv_header(csv_out);
     size_t n_warm = 100'000;
 
     std::vector<std::string> stream_names;
@@ -29,6 +29,10 @@ int main(int argc, char** argv) {
         }
     }
     else stream_names.push_back("streams/" + stream_name);
+
+    PmcCycles pmc;
+    pmc.open();
+    uint32_t timer_overhead = measure_timer_overhead(pmc);
 
     for (size_t i = 0; i < stream_names.size(); ++i) {
         std::cout << "\nBenching Stream " << stream_names[i] 
@@ -46,10 +50,7 @@ int main(int argc, char** argv) {
         write_stream_info(stream_cfg, stream_m, csv_out);
 
         std::vector<uint32_t> book_timings(stream_cfg.n_events-n_warm, 0);
-        PmcCycles pmc;
-        pmc.open();
-        uint32_t timer_overhead = measure_timer_overhead(pmc);
-
+        
         BenchTimestamps array_book_times = 
         benchmark<ArrayBook>(book_cfg, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
         write_bench_results(array_book_times, csv_out);

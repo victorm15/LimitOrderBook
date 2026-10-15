@@ -26,6 +26,10 @@ private:
     mutable std::vector<Price> bid_heap_, ask_heap_;
     ankerl::unordered_dense::map<OrderId, Handle> id_to_handle_;
     OrderArena arena_;
+    #ifdef BOOK_STATS
+        uint64_t best_calls = 0, lazy_deletions = 0, max_lazy_deletions = 0;
+        uint64_t max_heap_size = 0;
+    #endif
 
     void push_back(Level& lvl, Handle h) {
         Order& o = arena_[h];
@@ -169,8 +173,6 @@ public:
         reduce_order(o, e.quantity);
     }
 
-
-
     template <typename Sink> void replace(const Replace& r, Sink&& sink) {
         Side side = arena_[id_to_handle_.at(r.old_id)].side;
         cancel(Cancel{.id = r.old_id});
@@ -178,11 +180,23 @@ public:
     }
 
     Price best_bid() const {
+        #ifdef BOOK_STATS
+            if (max_heap_size < sizeof(bid_heap_)) max_heap_size = sizeof(bid_heap_);
+            ++best_calls;
+            uint64_t current_deletions = 0;
+        #endif
         if (bid_heap_.empty()) return NO_BID;
         while (!bid_heap_.empty()) {
             if (bids_.contains(bid_heap_.front())) {
+                #ifdef BOOK_STATS
+                    lazy_deletions += current_deletions;
+                    if (max_lazy_deletions < current_deletions) max_lazy_deletions = current_deletions;
+                #endif
                 return bid_heap_.front();
             }
+            #ifdef BOOK_STATS
+                ++current_deletions;
+            #endif
             std::pop_heap(bid_heap_.begin(), bid_heap_.end());
             bid_heap_.pop_back();
         }
@@ -190,11 +204,23 @@ public:
     }
 
     Price best_ask() const {
+        #ifdef BOOK_STATS
+            if (max_heap_size < sizeof(bid_heap_)) max_heap_size = sizeof(bid_heap_);
+            ++best_calls;
+            uint64_t current_deletions = 0;
+        #endif
         if (ask_heap_.empty()) return NO_ASK;
         while (!ask_heap_.empty()) {
             if (asks_.contains(ask_heap_.front())) {
+                #ifdef BOOK_STATS
+                    lazy_deletions += current_deletions;
+                    if (max_lazy_deletions < current_deletions) max_lazy_deletions = current_deletions;
+                #endif
                 return ask_heap_.front();
             }
+            #ifdef BOOK_STATS
+                ++current_deletions;
+            #endif
             std::pop_heap(ask_heap_.begin(), ask_heap_.end(), std::greater<Price>{});
             ask_heap_.pop_back();
         }
@@ -237,6 +263,24 @@ public:
         }
 
     }
+
+    #ifdef BOOK_STATS
+        HashBookStats get_stats() const {
+            return HashBookStats{
+                .best_calls = best_calls, 
+                .lazy_deletions = lazy_deletions,
+                .max_lazy_deletions = max_lazy_deletions
+                .max_heap_size = max_heap_size
+            };
+        }
+
+        void reset_stats() {
+            best_calls = 0;
+            lazy_deletions = 0;
+            max_lazy_deletions = 0;
+            max_heap_size = 0;
+        }
+    #endif
 
 };
 

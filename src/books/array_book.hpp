@@ -26,6 +26,9 @@ private:
     OrderArena arena_;
     Price base_price_;
     ankerl::unordered_dense::map<OrderId, Handle> id_to_handle_;
+    #ifdef BOOK_STATS
+        uint64_t scans = 0, scan_ticks = 0;
+    #endif
 
     void push_back(Level& lvl, Handle h) {
         Order& o = arena_[h];
@@ -60,9 +63,15 @@ private:
         lvl.total_quantity -= o.quantity;
     }
 
-    void update_best_bid(Price prev_best) {
-        for (Price p = prev_best; p >= base_price_; --p) {
+    void update_best_bid() {
+        #ifdef BOOK_STATS
+            ++scans;
+        #endif
+        for (Price p = best_bid_; p >= base_price_; --p) {
             if (bids_[p - base_price_].head != NIL) {
+                #ifdef BOOK_STATS
+                    scan_ticks += uint64_t(best_bid_) - p;
+                #endif
                 best_bid_ = p;
                 return;
             }
@@ -70,9 +79,15 @@ private:
         best_bid_ = NO_BID;
     }
     
-    void update_best_ask(Price prev_best) {
-        for (size_t t = size_t(prev_best - base_price_); t < asks_.size(); ++t) {
+    void update_best_ask() {
+        #ifdef BOOK_STATS
+            ++scans;
+        #endif
+        for (size_t t = size_t(best_ask_ - base_price_); t < asks_.size(); ++t) {
             if (asks_[t].head != NIL) {
+                #ifdef BOOK_STATS
+                    scan_ticks += uint64_t(t) - uint64_t(best_ask_);
+                #endif
                 best_ask_ = Price(t) + base_price_;
                 return;
             }
@@ -96,7 +111,7 @@ private:
             Handle h = id_to_handle_.at(o.id);
             id_to_handle_.erase(o.id);
             unlink(level_of(o.side, o.price), h);
-            if (o.side == Side::Buy) update_best_bid(best_bid_); else update_best_ask(best_ask_);
+            if (o.side == Side::Buy) update_best_bid(); else update_best_ask();
             arena_.release(h);
         }
         else {
@@ -169,7 +184,6 @@ public:
         reduce_order(resting, e.quantity);
     }
     
-
     template <typename Sink> void replace(const Replace& r, Sink&& sink) {
         Side side = arena_[id_to_handle_.at(r.old_id)].side;
         cancel(Cancel{.id = r.old_id});
@@ -180,7 +194,7 @@ public:
     
     Price best_ask() const { return best_ask_; }
     
-    Quantity   quantity_at(Side side, Price price) const { 
+    Quantity quantity_at(Side side, Price price) const { 
         assert(price >= base_price_ && price - base_price_ < Price(bids_.size()));
         return level_of(side, price).total_quantity;
     }
@@ -204,6 +218,17 @@ public:
             }
         }
     }
+
+    #ifdef BOOK_STATS
+        ArrayBookStats get_stats() const {
+            return ArrayBookStats{.scans = scans, .scan_ticks = scan_ticks};
+        }
+        
+        void reset_stats() {
+            scans = 0;
+            scan_ticks = 0;
+        }
+    #endif
 
 };
 

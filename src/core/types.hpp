@@ -66,10 +66,31 @@ struct StreamMeasurements {
 
 };
 
-struct BenchTimestamps {
-    uint32_t p50 = 0, p99 = 0, p999 = 0, max = 0;
-};
+#ifdef BOOK_STATS
+    struct BenchTimestamps {
+        uint32_t p50 = 0, p99 = 0, p999 = 0, max = 0, mean = 0;
+    };
 
-
-
+    struct ArrayBookStats {
+        uint64_t scans = NO_STAT;
+        uint64_t scan_ticks = NO_STAT;
+    };
+    struct BitmapBookStats {
+        uint64_t scans = NO_STAT;
+        uint64_t scan_ticks = NO_STAT;
+        uint64_t scan_words = NO_STAT;
+    };
+    struct HashBookStats {
+        uint64_t best_calls = NO_STAT;
+        uint64_t lazy_deletions = NO_STAT;
+        uint64_t max_lazy_deletions = NO_STAT;
+        uint64_t max_heap_size = NO_STAT;
+    };
+    struct SortedVecBookStats {
+        uint64_t searches = NO_STAT;
+        uint64_t search_steps = NO_STAT;
+        uint64_t shifts = NO_STAT;
+        uint64_t shifted_elements = NO_STAT;
+    };
+#endif
 #endif

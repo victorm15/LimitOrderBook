@@ -28,6 +28,9 @@ private:
     OrderArena arena_;
     Price base_price_;
     ankerl::unordered_dense::map<OrderId, Handle> id_to_handle_;
+    #ifdef BOOK_STATS
+        uint64_t scans = 0, scan_ticks = 0, scan_words = 0;
+    #endif
 
     void push_back(Level& lvl, Handle h) {
         Order& o = arena_[h];
@@ -62,22 +65,42 @@ private:
         lvl.total_quantity -= o.quantity;
     }
 
-    void update_best_bid(Price prev_best) {
-        size_t word = word_of(prev_best);
+    void update_best_bid() {
+        #ifdef BOOK_STATS
+            ++scans;
+            Price prev_best = best_bid_;
+        #endif
+        size_t word = word_of(best_bid_);
         for (size_t t = word+1; t-- > 0;) {
+            #ifdef BOOK_STATS
+               ++scan_words;     
+            #endif
             if (bids_bitmap_[t]) {
                 best_bid_ = t*64 + 63-std::countl_zero(bids_bitmap_[t]) + base_price_;
+                #ifdef BOOK_STATS
+                    scan_ticks += prev_best - best_bid_;
+                #endif
                 return;
             }
         }
         best_bid_ = NO_BID;
     }
     
-    void update_best_ask(Price prev_best) {
-        size_t word = word_of(prev_best);
+    void update_best_ask() {
+        #ifdef BOOK_STATS
+            ++scans;
+            Price prev_best = best_ask_;
+        #endif
+        size_t word = word_of(best_ask_);
         for (size_t t = word; t < asks_bitmap_.size(); ++t) {
+            #ifdef BOOK_STATS
+               ++scan_words;     
+            #endif
             if (asks_bitmap_[t]) {
                 best_ask_ = t*64 + std::countr_zero(asks_bitmap_[t]) + base_price_;
+                #ifdef BOOK_STATS
+                    scan_ticks += best_ask_ - prev_best;
+                #endif
                 return;
             }
         }
@@ -119,8 +142,8 @@ private:
             unlink(lvl, h);
             if (lvl.total_orders == 0) {
                 clear_bit(o.side, o.price);
-                if (o.side == Side::Buy && o.price == best_bid_) update_best_bid(best_bid_); 
-                else if (!(o.side == Side::Buy) && o.price == best_ask_) update_best_ask(best_ask_);
+                if (o.side == Side::Buy && o.price == best_bid_) update_best_bid(); 
+                else if (!(o.side == Side::Buy) && o.price == best_ask_) update_best_ask();
             }
             arena_.release(h);
         }
@@ -232,6 +255,18 @@ public:
             }
         }
     }
+
+    #ifdef BOOK_STATS
+        BitmapBookStats get_stats() const {
+            return BitmapBookStats{.scans = scans, .scan_ticks = scan_ticks, .scan_words = scan_words};
+        }
+
+        void reset_stats() {
+            scans = 0;
+            scan_ticks = 0;
+            scan_words = 0;
+        }
+    #endif
 
 };
 
