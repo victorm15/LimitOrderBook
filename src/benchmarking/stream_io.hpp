@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string>
 #include <filesystem>
+#include <iostream>
 #include "../core/events.hpp"
 #include "../core/types.hpp"
 
@@ -174,7 +175,7 @@ inline void write_bench_csv_header(std::ofstream& out) {
        "ArrayBook,P50,P99,P99.9,Max,Mean,"
        "SortedVecBook,P50,P99,P99.9,Max,Mean,"
        "HashBook,P50,P99,P99.9,Max,Mean,"
-       "BitmapBook,P50,P99,P99.9,Max\n";
+       "BitmapBook,P50,P99,P99.9,Max,Mean\n";
 }
 
 inline void write_stream_info(StreamConfig& cfg, StreamMeasurements& m, std::ofstream& out) {
