@@ -227,18 +227,18 @@ inline void print_bench_results(BenchTimestamps& ts) {
         << "SortedVecBook searches,SortedVecBook search_steps,SortedVecBook shifts,SortedVecBook shifted_elements\n";
     }
 
-    inline void write_stats(std::ofstream& out, ArrayBookStats& stats) {
+    inline void write_stats(std::ofstream& out, const ArrayBookStats& stats) {
         out << stats.scans << ',' << stats.scan_ticks << ',';
     }
-    inline void write_stats(std::ofstream& out, BitmapBookStats& stats) {
+    inline void write_stats(std::ofstream& out, const BitmapBookStats& stats) {
         out << stats.scans << ',' << stats.scan_ticks << ','
         << stats.scan_words << ',';
     }
-    inline void write_stats(std::ofstream& out, HashBookStats& stats) {
+    inline void write_stats(std::ofstream& out, const HashBookStats& stats) {
         out << stats.best_calls << ',' << stats.lazy_deletions << ','
         << stats.max_lazy_deletions << ',' << stats.max_heap_size << ',';
     }
-    inline void write_stats(std::ofstream& out, SortedVecBookStats& stats) {
+    inline void write_stats(std::ofstream& out, const SortedVecBookStats& stats) {
         out << stats.searches << ',' << stats.search_steps << ','
         << stats.shifts << ',' << stats.shifted_elements;
     }

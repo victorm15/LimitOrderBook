@@ -66,6 +66,7 @@ private:
     void update_best_bid() {
         #ifdef BOOK_STATS
             ++scans;
+            std::cout << "bid_scans: " << scans << "\n";
         #endif
         for (Price p = best_bid_; p >= base_price_; --p) {
             if (bids_[p - base_price_].head != NIL) {
@@ -85,6 +86,7 @@ private:
     void update_best_ask() {
         #ifdef BOOK_STATS
             ++scans;
+            std::cout << "ask_scans: " << scans << "\n";
         #endif
         for (size_t t = size_t(best_ask_ - base_price_); t < asks_.size(); ++t) {
             if (asks_[t].head != NIL) {
