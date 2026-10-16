@@ -10,7 +10,7 @@
 
 template <typename Book> void run_untimed(Book& book, std::vector<EventRecord>& events, size_t from, size_t to) {
     assert(from <= to);
-    std::cout << "from: " << from << "to: " << to "\n";
+    std::cout << "from: " << from << "to: " << to << "\n";
     for (size_t i = from; i < to; ++i) {
         switch(events[i].event_type) {
             case EventType::Add:
