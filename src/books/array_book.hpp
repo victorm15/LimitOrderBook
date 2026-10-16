@@ -116,7 +116,8 @@ private:
         if (o.quantity == quantity_removed) {
             Handle h = id_to_handle_.at(o.id);
             id_to_handle_.erase(o.id);
-            unlink(level_of(o.side, o.price), h);
+            Level& lvl = level_of(o.side, o.price)
+            unlink(lvl, h);
             if (lvl.total_orders == 0) {
                 if (o.side == Side::Buy && o.price == best_bid_) update_best_bid(); 
                 else if (!(o.side == Side::Buy) && o.price == best_ask_) update_best_ask();
