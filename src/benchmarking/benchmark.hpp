@@ -85,7 +85,7 @@ template <typename Book> BenchTimestamps benchmark(BookConfig& cfg, std::vector<
     for (int i = 0; i < trials; ++i) {
         Book book(cfg);
         run_untimed(book, events, 0, n_warm);
-        run_timed(book, events, n_events, n_warm, book_timings, pmc);
+        run_timed(book, events, n_warm, n_events, book_timings, pmc);
         Price best_bid = book.best_bid();
         Price best_ask = book.best_ask();
         asm volatile("" : : "r,m"(best_bid) : "memory");
