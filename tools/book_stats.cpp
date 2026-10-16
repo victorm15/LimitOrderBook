@@ -49,6 +49,10 @@ int main(int argc, char** argv) {
         run_untimed(array_book, events, n_warm, stream_cfg.n_events);
         ArrayBookStats array_book_stats = array_book.get_stats();
         write_stats(csv_out, array_book_stats);
+        Price array_best_bid = array_book.best_bid();
+        Price array_best_ask = array_book.best_ask();
+        asm volatile("" : : "r,m"(array_best_bid) : "memory");
+        asm volatile("" : : "r,m"(array_best_ask) : "memory");
 
         // BitmapBook bitmap_book(book_cfg);
         // run_untimed(bitmap_book, events, 0, n_warm);
