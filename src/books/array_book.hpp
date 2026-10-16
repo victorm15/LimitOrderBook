@@ -66,7 +66,6 @@ private:
     void update_best_bid() {
         #ifdef BOOK_STATS
             ++scans;
-            std::cout << "bid_scans: " << scans << "\n";
         #endif
         for (Price p = best_bid_; p >= base_price_; --p) {
             if (bids_[p - base_price_].head != NIL) {
@@ -86,7 +85,6 @@ private:
     void update_best_ask() {
         #ifdef BOOK_STATS
             ++scans;
-            std::cout << "ask_scans: " << scans << "\n";
         #endif
         for (size_t t = size_t(best_ask_ - base_price_); t < asks_.size(); ++t) {
             if (asks_[t].head != NIL) {
@@ -233,12 +231,10 @@ public:
 
     #ifdef BOOK_STATS
         ArrayBookStats get_stats() const {
-            std::cout << "RETURNED: " << scans << " " << scan_ticks << "\n";
             return ArrayBookStats{.scans = scans, .scan_ticks = scan_ticks};
         }
 
         void reset_stats() {
-            std::cout << "RESET\n";
             scans = 0;
             scan_ticks = 0;
         }

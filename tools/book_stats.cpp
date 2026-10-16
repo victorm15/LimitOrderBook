@@ -49,32 +49,28 @@ int main(int argc, char** argv) {
         run_untimed(array_book, events, n_warm, stream_cfg.n_events);
         ArrayBookStats array_book_stats = array_book.get_stats();
         write_stats(csv_out, array_book_stats);
-        Price array_best_bid = array_book.best_bid();
-        Price array_best_ask = array_book.best_ask();
-        asm volatile("" : : "r,m"(array_best_bid) : "memory");
-        asm volatile("" : : "r,m"(array_best_ask) : "memory");
 
-        // BitmapBook bitmap_book(book_cfg);
-        // run_untimed(bitmap_book, events, 0, n_warm);
-        // bitmap_book.reset_stats();
-        // run_untimed(bitmap_book, events, n_warm, stream_cfg.n_events);
-        // BitmapBookStats bitmap_book_stats = bitmap_book.get_stats();
-        // write_stats(csv_out, bitmap_book_stats);
+        BitmapBook bitmap_book(book_cfg);
+        run_untimed(bitmap_book, events, 0, n_warm);
+        bitmap_book.reset_stats();
+        run_untimed(bitmap_book, events, n_warm, stream_cfg.n_events);
+        BitmapBookStats bitmap_book_stats = bitmap_book.get_stats();
+        write_stats(csv_out, bitmap_book_stats);
 
-        // HashBook hash_book(book_cfg);
-        // run_untimed(hash_book, events, 0, n_warm);
-        // hash_book.reset_stats();
-        // run_untimed(hash_book, events, n_warm, stream_cfg.n_events);
-        // HashBookStats hash_book_stats = hash_book.get_stats();
-        // write_stats(csv_out, hash_book_stats);
+        HashBook hash_book(book_cfg);
+        run_untimed(hash_book, events, 0, n_warm);
+        hash_book.reset_stats();
+        run_untimed(hash_book, events, n_warm, stream_cfg.n_events);
+        HashBookStats hash_book_stats = hash_book.get_stats();
+        write_stats(csv_out, hash_book_stats);
 
-        // SortedVecBook sorted_vec_book(book_cfg);
-        // run_untimed(sorted_vec_book, events, 0, n_warm);
-        // sorted_vec_book.reset_stats();
-        // run_untimed(sorted_vec_book, events, n_warm, stream_cfg.n_events);
-        // SortedVecBookStats sorted_vec_book_stats = sorted_vec_book.get_stats();
-        // write_stats(csv_out, sorted_vec_book_stats);
-        // csv_out << "\n";
+        SortedVecBook sorted_vec_book(book_cfg);
+        run_untimed(sorted_vec_book, events, 0, n_warm);
+        sorted_vec_book.reset_stats();
+        run_untimed(sorted_vec_book, events, n_warm, stream_cfg.n_events);
+        SortedVecBookStats sorted_vec_book_stats = sorted_vec_book.get_stats();
+        write_stats(csv_out, sorted_vec_book_stats);
+        csv_out << "\n";
 
     }
     return 0;
