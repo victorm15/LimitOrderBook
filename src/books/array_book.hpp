@@ -89,7 +89,7 @@ private:
         for (size_t t = size_t(best_ask_ - base_price_); t < asks_.size(); ++t) {
             if (asks_[t].head != NIL) {
                 #ifdef BOOK_STATS
-                    scan_ticks += uint64_t(t) + uint64_t(base_price_ - best_ask_);
+                    scan_ticks += uint64_t(int64_t(t) + int64_t(base_price_ - best_ask_));
                 #endif
                 best_ask_ = Price(t) + base_price_;
                 return;
