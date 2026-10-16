@@ -12,6 +12,7 @@ template <typename Book> void run_untimed(Book& book, std::vector<EventRecord>& 
     assert(from <= to);
     std::cout << "from: " << from << "to: " << to << "\n";
     for (size_t i = from; i < to; ++i) {
+        std::cout << "ran\n";
         switch(events[i].event_type) {
             case EventType::Add:
                 book.add(Add{events[i].id, events[i].price, events[i].quantity, events[i].side}, NullSink{});
