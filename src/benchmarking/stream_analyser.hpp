@@ -41,7 +41,7 @@ private:
     RefBook book;
     VecSink sink;
 
-    void order_added_on_warm(Price p, Side s, Quantity q, OrderId id, Price best_price) {
+    void order_added_on_warm(Price p, Side s, Quantity q, OrderId id) {
         auto& m = s == Side::Buy ? bids_ : asks_;
         if (m.contains(p)) ++m[p];
         else m[p] = 1;
@@ -49,7 +49,7 @@ private:
         if (live_.size() > max_live_orders_) max_live_orders_ = live_.size();
     }
 
-    void order_removed_on_warm(Side s, OrderId id, Price best_price) {
+    void order_removed_on_warm(Side s, OrderId id) {
         assert(live_.contains(id));
         Price p = live_[id].p;
         auto& m = s == Side::Buy ? bids_ : asks_;
