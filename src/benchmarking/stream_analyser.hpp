@@ -41,6 +41,22 @@ private:
     RefBook book;
     VecSink sink;
 
+    void order_added_on_warm(Price p, Side s, Quantity q, OrderId id, Price best_price) {
+        auto& m = s == Side::Buy ? bids_ : asks_;
+        if (m.contains(p)) ++m[p];
+        else m[p] = 1;
+        live_[id] = {p, s, q};
+        if (live_.size() > max_live_orders_) max_live_orders_ = live_.size();
+    }
+
+    void order_removed_on_warm(Side s, OrderId id, Price best_price) {
+        assert(live_.contains(id));
+        Price p = live_[id].p;
+        auto& m = s == Side::Buy ? bids_ : asks_;
+        assert(m.contains(p));
+        if (--m[p] == 0) m.erase(p);
+        live_.erase(id);
+    }
 
     void on_order_added(Price p, Side s, Quantity q, OrderId id, Price best_price) {
         auto& m = s == Side::Buy ? bids_ : asks_;
@@ -84,42 +100,79 @@ public:
 
 
     StreamMeasurements analyse(const std::vector<EventRecord>& events) {
-
-        for (size_t i = 0; i < events.size(); ++i) {
+        assert(N_WARM < events.size());
+        for (size_t i = 0; i < N_WARM; ++i) {
             const EventRecord& event = events[i];
             if (event.event_type == EventType::Add) {
-                    if (event.price > highest_price_) highest_price_ = event.price;
-                    if (event.price < lowest_price_) lowest_price_ = event.price;
-                    ++sum_adds_;
-                    Price prev_best_bid = book.best_bid();
-                    Price prev_best_ask = book.best_ask();
-                    sink.clear();
-                    book.add(Add{.id = event.id, .price = event.price, .quantity = event.quantity, .side = event.side}, sink);
-                    // Add doesn't cross - rests
-                    if ((event.side == Side::Buy) ? event.price < prev_best_ask : event.price > prev_best_bid) {
+                if (event.price > highest_price_) highest_price_ = event.price;
+                if (event.price < lowest_price_) lowest_price_ = event.price;
+                Price prev_best_bid = book.best_bid();
+                Price prev_best_ask = book.best_ask();
+                sink.clear();
+                book.add(Add{.id = event.id, .price = event.price, .quantity = event.quantity, .side = event.side}, sink);
+                // Add doesn't cross - rests
+                if ((event.side == Side::Buy) ? event.price < prev_best_ask : event.price > prev_best_bid) {
+                    order_added_on_warm(event.price, event.side, event.quantity, event.id, 
+                        event.side == Side::Buy ? prev_best_bid : prev_best_ask);
+                }
+                else {
+                    Quantity quantity_left = event.quantity;
+                    for (const Fill& f : sink.trades) {
+                        quantity_left -= f.quantity;
+                        OrderData& maker = live_[f.maker];
+                        if (f.quantity == maker.q) order_removed_on_warm(maker.s, f.maker, event.side == Side::Buy ? prev_best_bid : prev_best_ask);
+                        else maker.q -= f.quantity;
+                    }
+                    // Add rested
+                    if (quantity_left > 0) {
+                        order_added_on_warm(event.price, event.side, event.quantity, event.id, event.side == Side::Buy ? prev_best_bid : prev_best_ask);
+                    }
+                }
+            }
+            else if (event.event_type == EventType::Cancel) {
+                order_removed_on_warm(live_[event.id].s, event.id, event.side == Side::Buy ? book.best_bid() : book.best_ask());
+                book.cancel(Cancel{.id = event.id});   
+            }
+            else if (event.event_type == EventType::Reduce) {
+                live_[event.id].q -= event.quantity;
+                book.reduce(Reduce{.id = event.id, .quantity_removed = event.quantity});
+            }
+        }
+
+        for (size_t i = N_WARM; i < events.size(); ++i) {
+            const EventRecord& event = events[i];
+            if (event.event_type == EventType::Add) {
+                if (event.price > highest_price_) highest_price_ = event.price;
+                if (event.price < lowest_price_) lowest_price_ = event.price;
+                ++sum_adds_;
+                Price prev_best_bid = book.best_bid();
+                Price prev_best_ask = book.best_ask();
+                sink.clear();
+                book.add(Add{.id = event.id, .price = event.price, .quantity = event.quantity, .side = event.side}, sink);
+                // Add doesn't cross - rests
+                if ((event.side == Side::Buy) ? event.price < prev_best_ask : event.price > prev_best_bid) {
+                    on_order_added(event.price, event.side, event.quantity, event.id, event.side == Side::Buy ? prev_best_bid : prev_best_ask);
+                }
+                else {
+                    Quantity quantity_left = event.quantity;
+                    for (const Fill& f : sink.trades) {
+                        ++sum_fills_;
+                        quantity_left -= f.quantity;
+                        OrderData& maker = live_[f.maker];
+                        if (f.quantity == maker.q) on_order_removed(maker.s, f.maker, event.side == Side::Buy ? prev_best_bid : prev_best_ask);
+                        else maker.q -= f.quantity;
+                    }
+                    // Add rested
+                    if (quantity_left > 0) {
                         on_order_added(event.price, event.side, event.quantity, event.id, event.side == Side::Buy ? prev_best_bid : prev_best_ask);
                     }
-                    else {
-                        Quantity quantity_left = event.quantity;
-                        for (const Fill& f : sink.trades) {
-                            ++sum_fills_;
-                            quantity_left -= f.quantity;
-                            OrderData& maker = live_[f.maker];
-                            if (f.quantity == maker.q) on_order_removed(maker.s, f.maker, event.side == Side::Buy ? prev_best_bid : prev_best_ask);
-                            else maker.q -= f.quantity;
-                        }
-                        // Add rested
-                        if (quantity_left > 0) {
-                            on_order_added(event.price, event.side, event.quantity, event.id, event.side == Side::Buy ? prev_best_bid : prev_best_ask);
-                        }
-                    }
+                }
 
             }
             else if (event.event_type == EventType::Cancel) {
                 on_order_removed(live_[event.id].s, event.id, event.side == Side::Buy ? book.best_bid() : book.best_ask());
                 book.cancel(Cancel{.id = event.id});
             }
-
             else if (event.event_type == EventType::Reduce) {
                 live_[event.id].q -= event.quantity;
                 book.reduce(Reduce{.id = event.id, .quantity_removed = event.quantity});
@@ -148,8 +201,6 @@ public:
 
 
             }
-
-
 
         }
 

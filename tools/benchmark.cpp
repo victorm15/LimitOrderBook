@@ -14,7 +14,6 @@ int main(int argc, char** argv) {
     int trials = argc > 2 ? std::atoi(argv[2]) : 3;
     if (!csv_out) throw std::runtime_error("cannot open csv");
     write_bench_csv_header(csv_out);
-    size_t n_warm = 100'000;
 
     std::vector<std::string> stream_names;
     if (stream_name == "lambda_sf_grid") {
@@ -49,28 +48,28 @@ int main(int argc, char** argv) {
         csv_out << stream_names[i] << ',';
         write_stream_info(stream_cfg, stream_m, csv_out);
 
-        std::vector<uint32_t> book_timings(stream_cfg.n_events-n_warm, 0);
+        std::vector<uint32_t> book_timings(stream_cfg.n_events-N_WARM, 0);
         
         BenchTimestamps array_book_times = 
-        benchmark<ArrayBook>(book_cfg, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
+        benchmark<ArrayBook>(book_cfg, events, book_timings, stream_cfg.n_events, timer_overhead, pmc, trials);
         write_bench_results(array_book_times, csv_out);
         std::cout << "Array Book:\n";
         print_bench_results(array_book_times);
 
         BenchTimestamps sorted_vec_book_times = 
-        benchmark<SortedVecBook>(book_cfg, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
+        benchmark<SortedVecBook>(book_cfg, events, book_timings, stream_cfg.n_events, timer_overhead, pmc, trials);
         write_bench_results(sorted_vec_book_times, csv_out);
         std::cout << "Sorted Vec Book:\n";
         print_bench_results(sorted_vec_book_times);
 
         BenchTimestamps hash_book_times = 
-        benchmark<HashBook>(book_cfg, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
+        benchmark<HashBook>(book_cfg, events, book_timings, stream_cfg.n_events, timer_overhead, pmc, trials);
         write_bench_results(hash_book_times, csv_out);
         std::cout << "Hash Book:\n";
         print_bench_results(hash_book_times);
 
         BenchTimestamps bitmap_book_times = 
-        benchmark<BitmapBook>(book_cfg, events, book_timings, n_warm, stream_cfg.n_events, timer_overhead, pmc, trials);
+        benchmark<BitmapBook>(book_cfg, events, book_timings, stream_cfg.n_events, timer_overhead, pmc, trials);
         write_bench_results(bitmap_book_times, csv_out);
         std::cout << "Bitmap Book:\n";
         print_bench_results(bitmap_book_times);

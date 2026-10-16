@@ -13,7 +13,6 @@ int main(int argc, char** argv) {
     std::ofstream csv_out("streams/" + stream_name + "_book_stats.csv");
     if (!csv_out) throw std::runtime_error("cannot open csv");
     write_stats_csv_header(csv_out);
-    size_t n_warm = 100'000;
 
     std::vector<std::string> stream_names;
     if (stream_name == "lambda_sf_grid") {
@@ -44,30 +43,30 @@ int main(int argc, char** argv) {
         csv_out << stream_names[i] << ',';
         
         ArrayBook array_book(book_cfg);
-        run_untimed(array_book, events, 0, n_warm);
+        run_untimed(array_book, events, 0, N_WARM);
         array_book.reset_stats();
-        run_untimed(array_book, events, n_warm, stream_cfg.n_events);
+        run_untimed(array_book, events, N_WARM, stream_cfg.n_events);
         ArrayBookStats array_book_stats = array_book.get_stats();
         write_stats(csv_out, array_book_stats);
 
         BitmapBook bitmap_book(book_cfg);
-        run_untimed(bitmap_book, events, 0, n_warm);
+        run_untimed(bitmap_book, events, 0, N_WARM);
         bitmap_book.reset_stats();
-        run_untimed(bitmap_book, events, n_warm, stream_cfg.n_events);
+        run_untimed(bitmap_book, events, N_WARM, stream_cfg.n_events);
         BitmapBookStats bitmap_book_stats = bitmap_book.get_stats();
         write_stats(csv_out, bitmap_book_stats);
 
         HashBook hash_book(book_cfg);
-        run_untimed(hash_book, events, 0, n_warm);
+        run_untimed(hash_book, events, 0, N_WARM);
         hash_book.reset_stats();
-        run_untimed(hash_book, events, n_warm, stream_cfg.n_events);
+        run_untimed(hash_book, events, N_WARM, stream_cfg.n_events);
         HashBookStats hash_book_stats = hash_book.get_stats();
         write_stats(csv_out, hash_book_stats);
 
         SortedVecBook sorted_vec_book(book_cfg);
-        run_untimed(sorted_vec_book, events, 0, n_warm);
+        run_untimed(sorted_vec_book, events, 0, N_WARM);
         sorted_vec_book.reset_stats();
-        run_untimed(sorted_vec_book, events, n_warm, stream_cfg.n_events);
+        run_untimed(sorted_vec_book, events, N_WARM, stream_cfg.n_events);
         SortedVecBookStats sorted_vec_book_stats = sorted_vec_book.get_stats();
         write_stats(csv_out, sorted_vec_book_stats);
         csv_out << "\n";

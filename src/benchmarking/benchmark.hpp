@@ -73,10 +73,10 @@ inline uint32_t measure_timer_overhead(PmcCycles& pmc, size_t n = 1'000'000) {
 }
 
 template <typename Book> BenchTimestamps benchmark(BookConfig& cfg, std::vector<EventRecord>& events, std::vector<uint32_t>& book_timings, 
-    size_t n_warm, size_t n_events, uint32_t timer_overhead, PmcCycles& pmc, int trials) {
+    size_t n_events, uint32_t timer_overhead, PmcCycles& pmc, int trials) {
     
     
-    assert(n_warm < n_events);
+    assert(N_WARM < n_events);
     std::vector<uint32_t> p50_ts;
     std::vector<uint32_t> p99_ts;
     std::vector<uint32_t> p999_ts;
@@ -84,8 +84,8 @@ template <typename Book> BenchTimestamps benchmark(BookConfig& cfg, std::vector<
     uint32_t timings_sum = 0;
     for (int i = 0; i < trials; ++i) {
         Book book(cfg);
-        run_untimed(book, events, 0, n_warm);
-        run_timed(book, events, n_warm, n_events, book_timings, pmc);
+        run_untimed(book, events, 0, N_WARM);
+        run_timed(book, events, N_WARM, n_events, book_timings, pmc);
         Price best_bid = book.best_bid();
         Price best_ask = book.best_ask();
         asm volatile("" : : "r,m"(best_bid) : "memory");
