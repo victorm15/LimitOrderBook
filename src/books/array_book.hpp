@@ -76,6 +76,9 @@ private:
                 return;
             }
         }
+        #ifdef BOOK_STATS
+            scan_ticks += uint64_t(best_bid_) - base_price_;
+        #endif
         best_bid_ = NO_BID;
     }
     
@@ -86,12 +89,15 @@ private:
         for (size_t t = size_t(best_ask_ - base_price_); t < asks_.size(); ++t) {
             if (asks_[t].head != NIL) {
                 #ifdef BOOK_STATS
-                    scan_ticks += uint64_t(t) - uint64_t(best_ask_);
+                    scan_ticks += uint64_t(t) + uint64_t(base_price_ - best_ask_);
                 #endif
                 best_ask_ = Price(t) + base_price_;
                 return;
             }
         }
+        #ifdef BOOK_STATS
+            scan_ticks += uint64_t(asks_.size()) + base_price_ - best_ask_;
+        #endif
         best_ask_ = NO_ASK;
     }
 
@@ -111,7 +117,10 @@ private:
             Handle h = id_to_handle_.at(o.id);
             id_to_handle_.erase(o.id);
             unlink(level_of(o.side, o.price), h);
-            if (o.side == Side::Buy) update_best_bid(); else update_best_ask();
+            if (lvl.total_orders == 0) {
+                if (o.side == Side::Buy && o.price == best_bid_) update_best_bid(); 
+                else if (!(o.side == Side::Buy) && o.price == best_ask_) update_best_ask();
+            }
             arena_.release(h);
         }
         else {

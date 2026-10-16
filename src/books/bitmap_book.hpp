@@ -84,6 +84,9 @@ private:
             }
         }
         best_bid_ = NO_BID;
+        #ifdef BOOK_STATS
+            scan_ticks += uint64_t(prev_best) - base_price_;
+        #endif
     }
     
     void update_best_ask() {
@@ -105,6 +108,9 @@ private:
             }
         }
         best_ask_ = NO_ASK;
+        #ifdef BOOK_STATS
+            scan_ticks += asks_.size() + base_price_ - prev_best;
+        #endif
     }
 
     Level& level_of(Side side, Price price) { 

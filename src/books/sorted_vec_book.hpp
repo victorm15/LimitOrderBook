@@ -99,7 +99,7 @@ private:
             if (lvl.total_orders == 0) {
                 #ifdef BOOK_STATS
                     ++shifts;
-                    shifted_elements += bids_.size()-lvl_idx-1;
+                    shifted_elements += (is_buy ? bids_.size() : asks_.size())-lvl_idx-1;
                 #endif
                 if (is_buy) bids_.erase(bids_.begin() + lvl_idx); 
                 else asks_.erase(asks_.begin() + lvl_idx);
@@ -271,7 +271,6 @@ public:
                 .shifted_elements = shifted_elements
             };
         }
-
         void reset_stats() {
             searches = 0;
             search_steps = 0;
