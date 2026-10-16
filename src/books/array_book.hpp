@@ -233,10 +233,12 @@ public:
 
     #ifdef BOOK_STATS
         ArrayBookStats get_stats() const {
+            std::cout << "RETURNED: " << scans << " " << scan_ticks << "\n";
             return ArrayBookStats{.scans = scans, .scan_ticks = scan_ticks};
         }
 
         void reset_stats() {
+            std::cout << "RESET\n";
             scans = 0;
             scan_ticks = 0;
         }
