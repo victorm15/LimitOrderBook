@@ -41,7 +41,7 @@ static void report_stat(const char* label, std::vector<BenchTimestamps>& ts,
               << std::setw(6) << s.noise_pct << "%\n";
 }
 
-static void report_book(const std::string& name, const std::vector<BenchTimestamps>& ts) {
+static void report_book(const std::string& name, std::vector<BenchTimestamps>& ts) {
     std::cout << "\n" << name << "  (" << ts.size() << " runs)\n";
     report_stat("mean",  ts, &BenchTimestamps::mean);
     report_stat("p50",   ts, &BenchTimestamps::p50);
