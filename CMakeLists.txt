@@ -14,7 +14,7 @@ add_library(lob INTERFACE)
 target_include_directories(lob INTERFACE src)
 target_compile_options(lob INTERFACE -Wall -Wextra -march=native)
 
-foreach(t benchmark generate_stream differential_test book_stats)
+foreach(t benchmark generate_stream differential_test book_stats noise)
   add_executable(${t} tools/${t}.cpp)
   target_link_libraries(${t} PRIVATE lob)
 endforeach()
