@@ -30,7 +30,7 @@ static Spread spread_of(std::vector<BenchTimestamps>& ts, uint32_t BenchTimestam
     return s;
 }
 
-static void report_stat(const char* label, const std::vector<BenchTimestamps>& ts,
+static void report_stat(const char* label, std::vector<BenchTimestamps>& ts,
                         uint32_t BenchTimestamps::* field) {
     Spread s = spread_of(ts, field);
     std::cout << "  " << std::left << std::setw(7) << label << std::right
