@@ -16,7 +16,7 @@ struct Spread {
     double   noise_pct = 0.0;
 };
 
-static Spread spread_of(std::vector<uint32_t>& ts) {
+static Spread spread_of(std::vector<BenchTimestamps>& ts, uint32_t BenchTimestamps::* field) {
     Spread s;
     if (ts.empty()) return s;
     std::vector<uint32_t> v;
