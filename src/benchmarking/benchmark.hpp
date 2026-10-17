@@ -113,7 +113,7 @@ template <typename Book> BenchTimestamps benchmark(BookConfig& cfg, std::vector<
         .p99 = p99_ts[p99_ts.size()/2],
         .p999 = p999_ts[p999_ts.size()/2],
         .max = max_ts[max_ts.size()/2],
-        .mean = timings_sum/uint32_t(n_events)
+        .mean = timings_sum/uint32_t(trials*(n_events-N_WARM))
     };
     
 }
