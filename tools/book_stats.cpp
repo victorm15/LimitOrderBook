@@ -26,6 +26,12 @@ int main(int argc, char** argv) {
             }
         }
     }
+    if (stream_name == "add_lambda") {
+        std::vector<double> add_lambdas = {-0.5, -0.25, 0.0, 0.25, 0.5};
+        for (size_t r = 0; r < add_lambdas.size(); ++r) {
+            stream_names.push_back("add_lambda_" + std::to_string(int(add_lambdas[r] * 100)));
+        }
+    }
     else stream_names.push_back("streams/" + stream_name);
 
     for (size_t i = 0; i < stream_names.size(); ++i) {

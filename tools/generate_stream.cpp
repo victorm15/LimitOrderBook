@@ -20,6 +20,16 @@ int main(int argc, char** argv) {
             }
         }
     }
+    if (stream_name == "add_lambda") {
+        std::vector<double> add_lambdas = {-0.5, -0.25, 0.0, 0.25, 0.5};
+        for (size_t r = 0; r < add_lambdas.size(); ++r) {
+
+            cfgs.push_back(StreamConfig{.add_dist_lambda = add_lambdas[r],
+                .dist_scale_factor = 100});
+            stream_names.push_back("add_lambda_" + std::to_string(int(add_lambdas[r] * 100)));
+
+        }
+    }
     else {
         cfgs.push_back(StreamConfig{});
         stream_names.push_back("stream0");
