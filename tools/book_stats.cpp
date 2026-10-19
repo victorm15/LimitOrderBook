@@ -46,6 +46,17 @@ int main(int argc, char** argv) {
             }
         }
     }
+    else if (stream_name == "level_churn_no_warm") {
+        std::vector<double> add_lambdas = {0.5, 0.4, 0.3, 0.2, 0.1, 0.05, 0.01, 0.0, -0.01, -0.05, -0.1, -0.2, -0.3, -0.4, -0.5};
+        std::vector<double> cancel_lambdas = {0.5, 0.4, 0.3, 0.2, 0.1, 0.05, 0.01, 0.0, -0.01, -0.05, -0.1, -0.2, -0.3, -0.4, -0.5};
+        int occupied_level_range = 300;
+        for (size_t r = 0; r < add_lambdas.size(); ++r) {
+            for (size_t i = 0; i < cancel_lambdas.size(); ++i) {
+                stream_names.push_back("streams/stream_lvlchurn_grid_nw" + std::to_string(int(add_lambdas[r] * 100)) + 
+                "-" + std::to_string(int(cancel_lambdas[i] * 100)));
+            }
+        }
+    }
     else stream_names.push_back("streams/" + stream_name);
 
     for (size_t i = 0; i < stream_names.size(); ++i) {
