@@ -51,9 +51,11 @@ static void report_book(const std::string& name, std::vector<BenchTimestamps>& t
 }
 
 int main(int argc, char** argv) {
-    const int         trials      = argc > 1 ? std::atoi(argv[1]) : 100;
-    const std::string stream_name = argc > 2 ? argv[2] : "stream0";
+    const int         samples      = argc > 1 ? std::atoi(argv[1]) : 100;
+    const int trials = argc > 2 ? std::atoi(argv[2]) : 10;
+    const std::string stream_name = argc > 3 ? argv[3] : "stream0";
     const std::string path        = "streams/" + stream_name;
+    
 
     std::vector<EventRecord> events = read_stream(path + ".bin");
     prefault(events);
@@ -73,20 +75,20 @@ int main(int argc, char** argv) {
     std::vector<uint32_t> book_timings(stream_cfg.n_events - N_WARM, 0);
 
     std::vector<BenchTimestamps> array_ts, sorted_vec_ts, hash_ts, bitmap_ts;
-    array_ts.reserve(trials); sorted_vec_ts.reserve(trials);
-    hash_ts.reserve(trials);  bitmap_ts.reserve(trials);
+    array_ts.reserve(samples); sorted_vec_ts.reserve(samples);
+    hash_ts.reserve(samples);  bitmap_ts.reserve(samples);
 
-    for (int i = 0; i < trials; ++i) {
+    for (int i = 0; i < samples; ++i) {
         std::cout << "run " << i + 1 << "/" << trials << "\n" << std::flush;
         
         array_ts.push_back(
-            benchmark<ArrayBook>(book_cfg, events, book_timings, stream_cfg.n_events, timer_overhead, pmc, 1));
+            benchmark<ArrayBook>(book_cfg, events, book_timings, stream_cfg.n_events, timer_overhead, pmc, trials));
         sorted_vec_ts.push_back(
-            benchmark<SortedVecBook>(book_cfg, events, book_timings, stream_cfg.n_events, timer_overhead, pmc, 1));
+            benchmark<SortedVecBook>(book_cfg, events, book_timings, stream_cfg.n_events, timer_overhead, pmc, trials));
         hash_ts.push_back(
-            benchmark<HashBook>(book_cfg, events, book_timings, stream_cfg.n_events, timer_overhead, pmc, 1));
+            benchmark<HashBook>(book_cfg, events, book_timings, stream_cfg.n_events, timer_overhead, pmc, trials));
         bitmap_ts.push_back(
-            benchmark<BitmapBook>(book_cfg, events, book_timings, stream_cfg.n_events, timer_overhead, pmc, 1));
+            benchmark<BitmapBook>(book_cfg, events, book_timings, stream_cfg.n_events, timer_overhead, pmc, trials));
     }
 
     report_book("ArrayBook",     array_ts);
