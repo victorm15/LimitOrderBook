@@ -38,6 +38,7 @@ struct BookConfig {
     Price band_ticks = 2000;
     size_t arena_size = 10000;
     size_t number_of_levels = 1024;
+    size_t heap_size = 1024;
 };
 
 struct StreamConfig {

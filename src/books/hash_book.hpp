@@ -116,8 +116,8 @@ public:
     arena_{config.arena_size}{
         bids_.reserve(config.number_of_levels);
         asks_.reserve(config.number_of_levels);
-        bid_heap_.reserve(config.band_ticks);
-        ask_heap_.reserve(config.band_ticks);
+        bid_heap_.reserve(config.heap_size);
+        ask_heap_.reserve(config.heap_size);
         id_to_handle_.reserve(config.arena_size);
     }
 
