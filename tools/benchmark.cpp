@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
         BookConfig book_cfg{.base_price = stream_m.lowest_price, .band_ticks = stream_m.highest_price - stream_m.lowest_price + 1,
             .arena_size = stream_m.max_live_orders + 50, 
             .number_of_levels = size_t(stream_m.highest_price - stream_m.lowest_price),
-            .heap_size = 100'000
+            .heap_size = 200'000
             };
 
         csv_out << stream_names[i] << ',';
