@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     if (stream_name == "add_lambda") {
         std::vector<double> add_lambdas = {0.0, -0.01, -0.05, -0.1, -0.2, -0.3, -0.4, -0.5};
         std::vector<int> scale_factors = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 100};
-        for (size_t r = 0; r < dist_lambdas.size(); ++r) {
+        for (size_t r = 0; r < add_lambdas.size(); ++r) {
             for (size_t i = 0; i < scale_factors.size(); ++i) {
                 cfgs.push_back(StreamConfig{.add_dist_lambda = add_lambdas[r],
                     .dist_scale_factor = scale_factors[i]});
