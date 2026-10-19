@@ -205,7 +205,7 @@ public:
 
     Price best_ask() const {
         #ifdef BOOK_STATS
-            if (max_heap_size < bid_heap_.size()) max_heap_size = ask_heap_.size();
+            if (max_heap_size < ask_heap_.size()) max_heap_size = ask_heap_.size();
             ++best_calls;
             uint64_t current_deletions = 0;
         #endif
