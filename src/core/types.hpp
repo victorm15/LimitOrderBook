@@ -13,8 +13,7 @@ using Handle = std::uint32_t;
 inline constexpr Handle NIL = std::numeric_limits<Handle>::max();
 inline constexpr Price NO_BID = std::numeric_limits<Price>::min();
 inline constexpr Price NO_ASK = std::numeric_limits<Price>::max();
-// inline constexpr size_t N_WARM = 100'000;
-inline constexpr size_t N_WARM = 0;
+inline constexpr size_t N_WARM = 100'000;
 
 enum class Side : uint8_t { Buy, Sell };
 
