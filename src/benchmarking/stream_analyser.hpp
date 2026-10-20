@@ -124,7 +124,7 @@ public:
                     }
                     // Add rested
                     if (quantity_left > 0) {
-                        order_added_on_warm(event.price, event.side, event.quantity, event.id);
+                        order_added_on_warm(event.price, event.side, quantity_left, event.id);
                     }
                 }
             }
@@ -155,6 +155,7 @@ public:
                 else {
                     Quantity quantity_left = event.quantity;
                     for (const Fill& f : sink.trades) {
+                        assert(f.quantity <= maker.q);
                         ++sum_fills_;
                         quantity_left -= f.quantity;
                         OrderData& maker = live_[f.maker];
@@ -163,7 +164,7 @@ public:
                     }
                     // Add rested
                     if (quantity_left > 0) {
-                        on_order_added(event.price, event.side, event.quantity, event.id, event.side == Side::Buy ? prev_best_bid : prev_best_ask);
+                        on_order_added(event.price, event.side, quantity_left, event.id, event.side == Side::Buy ? prev_best_bid : prev_best_ask);
                     }
                 }
 
