@@ -57,6 +57,20 @@ int main(int argc, char** argv) {
             }
         }
     }
+    else if (stream_name == "occ_levels") {
+        std::vector<double> add_lambdas = {0.1, 0.05, 0.01, 0.0, -0.01, -0.05, -0.1};
+        std::vector<double> cancel_lambdas = {0.1, 0.05, 0.01, 0.0, -0.01, -0.05, -0.1};
+        std::vector<int> occ_levels = {100, 200, 300, 400, 500, 600, 700, 800};
+        for (size_t r = 0; r < add_lambdas.size(); ++r) {
+            for (size_t i = 0; i < cancel_lambdas.size(); ++i) {
+                for (size_t j = 0; j < occ_levels.size(); ++j) {
+                    stream_names.push_back("streams/stream_occ_levels_grid" + std::to_string(int(add_lambdas[r] * 100)) + 
+                        "-" + std::to_string(int(cancel_lambdas[i] * 100)) + 
+                        "-" + std::to_string(occ_levels[j]));
+                }
+            }
+        }
+    }
     else stream_names.push_back("streams/" + stream_name);
 
     PmcCycles pmc;
