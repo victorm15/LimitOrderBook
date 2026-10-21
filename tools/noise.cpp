@@ -51,7 +51,7 @@ static void report_book(const std::string& name, std::vector<BenchTimestamps>& t
 }
 
 int main(int argc, char** argv) {
-    const int         samples      = argc > 1 ? std::atoi(argv[1]) : 100;
+    const int         samples      = argc > 1 ? std::atoi(argv[1]) : 10;
     const int trials = argc > 2 ? std::atoi(argv[2]) : 10;
     const std::string stream_name = argc > 3 ? argv[3] : "stream0";
     const std::string path        = "streams/" + stream_name;
@@ -65,7 +65,8 @@ int main(int argc, char** argv) {
         .base_price       = stream_m.lowest_price,
         .band_ticks       = stream_m.highest_price - stream_m.lowest_price + 1,
         .arena_size       = stream_m.max_live_orders + 50,
-        .number_of_levels = size_t(stream_m.highest_price - stream_m.lowest_price)
+        .number_of_levels = size_t(stream_m.highest_price - stream_m.lowest_price),
+        .heap_size = 200'000
     };
 
     PmcCycles pmc;
