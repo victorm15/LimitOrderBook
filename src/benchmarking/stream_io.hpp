@@ -155,8 +155,8 @@ inline std::pair<StreamConfig, StreamMeasurements> read_meta(const std::string& 
     m.fills_per_add               = number<double>  (text, "fills_per_add",            path);
     m.average_gap                 = number<Price>   (text, "median_gap",               path);
     m.average_occupied_levels     = number<size_t>  (text, "median_occupied_levels",   path);
-    m.avg_level_construction_dist = number<Price>   (text, "median_creation_dist",     path);
-    m.avg_level_destruction_dist  = number<Price>   (text, "median_destruction_dist",  path);
+    m.avg_level_construction_dist = number<double>   (text, "median_creation_dist",     path);
+    m.avg_level_destruction_dist  = number<double>   (text, "median_destruction_dist",  path);
     m.max_live_orders             = number<size_t>  (text, "max_live_orders",          path);
     m.lowest_price                = number<Price>   (text, "lowest_price",             path);
     m.highest_price               = number<Price>   (text, "highest_price",            path);
