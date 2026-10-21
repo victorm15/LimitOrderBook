@@ -94,7 +94,14 @@ private:
         std::sort(vec.begin(), vec.end());
         return vec[vec.size()/2];
     }
-
+    
+    double to_mean(std::vector<Price>& vec) {
+        Price sum = 0;
+        for (const Price& p : vec) {
+            sum += p;
+        }
+        return double(sum)/vec.size();
+    }
 public:
 
 
@@ -206,8 +213,8 @@ public:
 
         Price avg_gap = to_median(median_gap_between_levels_);
         size_t avg_occ_lvls = to_median(occupied_levels_);
-        Price avg_creation_dist = to_median(level_creation_dists_);
-        Price avg_destruction_dist = to_median(level_destruction_dists_);
+        double avg_creation_dist = to_mean(level_creation_dists_);
+        double avg_destruction_dist = to_mean(level_destruction_dists_);
 
         return StreamMeasurements{
             .level_deletions = levels_destroyed_,
