@@ -43,7 +43,7 @@ Each of the books expose a snapshot function as part of its interface, returning
 
 Development happened on an Apple M-series laptop, but I used a bare metal server for measurements. I didn’t run on mac as the timer resolution `mach_absolute_time()` for Silicon Macs is coarse ~42 ns compared to book operations.
 
-The machine used was a single-tenant dedicated server with AMD Ryzen 7 Pro 8700 GE 3.65 GHz, 8 cores, and 16 MB shared L3 running Ubuntu 24.04 with Kernel 6.8. I chose a machine with a single CCD so measurements did not depend on which core complex the thread lands on.
+The machine used was a single-tenant dedicated server with AMD Ryzen 7 Pro 8700 GE 3.65 GHz, 8 cores, and 16 MB shared L3 running Ubuntu 24.04 with Kernel 6.8.0-146. I chose a machine with a single CCD so measurements did not depend on which core complex the thread lands on.
 
 Machine Configuration:
 - Cores 2 and 3 were isolated with `isolcpus=2,3`, `nohz_full=2,3`, `rcu_nocbs=2,3`, `nosmt`
@@ -164,9 +164,9 @@ Since the LOBSTER data for AMZN only features 10 occupied levels on each side, w
 
 In this investigation, we found that array book and bitmap book performance varies with book density and level churn rate. We found that the bitset overhead on bitmap book operations was lower than expected. The bitmap book performance measurements was stable across the workloads; however, as price bands become massive the array would get very large and need lots of cache space. We found that the Hash Book performance varies with level churn, while the amount of best level deletions sets the performance distribution between max and mean cycles. Additionally, while we predicted that Sorted Vec Book performance would vary with level churn, we found that level churn rate did not drive mean or P99.9 values. Instead, the mean depended on the average number of occupied levels to increase the number of search steps, while the P99.9 largely remained invariant.
 
-By measuring properties of the AMZN data, we found that for the array and bitmap structures, it would not favour one over the other. It also had a relatively high level churn rate which made projected mean and tail cycles relatively high for the Hash structure. Though we could not determine exactly how it should perform against the sorted vec book structure, since book performance remained stable, we would expect performance within the measured values. Comparing these values, the array and bitmap structures would perform best for AMZN's workload adn the hash book structure the worst.
+By measuring properties of the AMZN data, we found that for the array and bitmap structures, it would not favour one over the other. It also had a relatively high level churn rate which made projected mean and tail cycles relatively high for the Hash structure. Though we could not determine exactly how it should perform against the sorted vec book structure, since book performance remained stable, we would expect performance within the measured values. Comparing these values, the array and bitmap structures would perform best for AMZN's workload and the hash book structure the worst.
 
-We also found during measurements that the timestamp counter on microarchitectures implement constant TSCs increment in steps of 10ns, which causes timing quantisation too wide for benchmarking these books.
+We also found during measurements that the timestamp counter on microarchitectures implementing constant TSCs increment every 10ns, which causes timing quantisation too wide for benchmarking these books.
 
 ## 7. Limitations
 
@@ -182,7 +182,7 @@ Beyond these results ultimately being tied to the implementations of these books
 - The model for the AMZN trading day has several inaccuracies:
 	- Correlated flows of events are not implemented, reducing price drift and other emergent phenomena
 	- There is no arrival process for events, they are read from a vector, real events can arrive in bursts which add to latency
-- Order-IDs are sequential, which is friendly to the hash map present in all books which uses IDs as the key, real Order-IDs are spars 64-bit values
+- Order-IDs are sequential, which is friendly to the hash map present in all books which uses IDs as the key, real Order-IDs are sparse 64-bit values
 - All operations are single-threaded
 - The benchmarks are only for add, cancel, and reduce events (replace in particular would be an expensive operation)
 - Synthetic data flow is friendlier to branch predictor
