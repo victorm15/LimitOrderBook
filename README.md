@@ -122,7 +122,7 @@ Both Array and Bitmap's longest operation is the scan for the next best level. B
 
 We captured scan frequency and length within our book stats, so we can use scanned ticks (price difference between previous best and new best in ticks) per 1000 events to capture both length and frequency. The knob for scan length is distance scale factor, and scan frequency depends on how often the best levels are cleared. By pulling cancels towards the touch, they thin and are emptied more often; we can do something similar by pushing adds away from touch. We plot the P99.9 and Mean time difference between Array and Bitmap book against scanned ticks per 1000 events, using both datasets generated from sweeping λ for add and cancel distributions.
 
-![Array-Bitmap] (./images/Array-Bitmap-1.png)
+! [Array-Bitmap] (./images/Array-Bitmap-1.png)
 
 For P99.9, above ~2000 scanned ticks per 1000 events, we have a linear trend; below ~2000, scans aren't frequent enough for Bitmap to start winning (note that the trendlines are created only from values that exceed 2000 scanned ticks). However, there’s essentially no difference below 2000 scanned ticks - most values are within our noise threshold of ~40 cycles. We see this again with the mean cycle differences, where Bitmap and Array are closely tied with short, infrequent scans. This means the overhead for the bitset is relatively small. 
 
@@ -136,11 +136,11 @@ Both Hash Book and Sorted Vec Book indicated level churn is the primary driver f
 
 Hash Book is a textbook implementation of a lazy-deletion heap: when an order at a price that is not contained in the hash map is added, that price is inserted in the heap. It will not be deleted as soon as the level empties, but rather when the entry is hit while popping stale entries to find the best price level that is live. This means we can get multiple entries in the heap referring to the same price, so a sequence of lazy deletions can get very expensive. Note that the graphs are drawn from results with bbos deleted > 0, since lazy deletions only happen with best level deletions.
 
-![Hash 1] (./images/Hash-1.png)
+! [Hash 1] (./images/Hash-1.png)
 
 An entry only becomes stale when its level is deleted: we see from the graphs above that level deletions and lazy deletions are strongly correlated and nearly 1:1. Since lazy deletions are the most expensive operation, level deletions per 1000 events drive mean cycles for hash book operations.
 
-![Hash 2] (./images/Hash-2.png)
+! [Hash 2] (./images/Hash-2.png)
 
 A lazy deletion sequence is only started when the best level is emptied: the more often the BBO empties, the more often the stale entries above the next-best live levels are purged so the less they accumulate and the less big lazy deletion sequences are on average. We see that the ratio between the max and mean (per event) for lazy deletions diminish as BBO deletions increase, as each sequence will have less pops. As a result, the max:mean ratio for book operation cycle counts also diminishes.
 
@@ -150,11 +150,11 @@ While level deletions set the total work for the hashbook over the events, the d
 
 The sorted vec book has two operations which matter for its timings: binary search, performed on nearly every operation, and vector insertions/deletions performed on level churn. While the first is O(log N), insertions/deletions are O(d) with d being distance of level from best level in terms of occupied levels.
 
-![Sorted 1] (./images/Sorted-1.png)
+! [Sorted 1] (./images/Sorted-1.png)
 
 Binary search is performed on nearly every operation (~0.98 per op), so the average number of steps in each search is what drives the mean. The average number of search steps per search depends on the average number of live levels. Search steps per operation can go from ~2-6. On the other hand, level churn is rarer (~0.06-0.63 per op) and most churn is at the touch, so shifted elements per op is small (max of ~2.28 per op). Moreover one element shifted is far cheaper than one search step so the mean is not driven by the number of shifted elements nor the level churn rate, unlike what we expected.
 
-![Sorted 2] (./images/Sorted-2.png)
+! [Sorted 2] (./images/Sorted-2.png)
 
 We find that P99.9 is stable against the number of shifted elements per shift. A possible reason may be that since churn away from touch inevitably happens, shifts with many elements will always be in the tail. The P99.9 is only 900 of the 900’000 events measured, we have at least ~100’000 levels being created/destroyed in those 900’000 events so it is likely that at least 900 of these happen far from the touch, so as the average number of elements per shift increases, the 900 longest shifts don't necessarily become any longer. Note that the increase in P99.9 cycles after 2 elements per shift is caused by best levels no longer being cleared which we can assume would be present in any real event stream.
 
