@@ -75,7 +75,7 @@ After timings are recorded we write P50 (median), P99, P99.9, max, and mean time
 * For max, it was ~500 cycles
 ### 4.2 Workload Model
 
-I chose to benchmark the books against generated synthetic data instead of real market data, so I could differ workloads along controlled axes. It still mattered to calibrate this against real market data, so I used data from LOBSTER's sample data for AMZN 2012-06-21 as a baseline. The data had the messages (event type, price, etc.) and top 10 levels of the order book after each message for the trading day.
+I chose to benchmark the books against generated synthetic data instead of real market data, so I could differ workloads along controlled axes. It still mattered to calibrate this against real market data, so I used data from LOBSTER's sample data for [AMZN 2012-06-21](https://php.lobsterdata.com/info/DataSamples.php) as a baseline. The data had the messages (event type, price, etc.) and top 10 levels of the order book after each message for the trading day.
 
 What was measured from AMZN (note: 1 tick = 1 cent for AMZN):
 - The mid (~220 USD) and mean spread (~13 ticks)
