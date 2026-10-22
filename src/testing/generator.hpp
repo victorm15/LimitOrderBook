@@ -10,27 +10,15 @@
 #include <variant>
 #include <type_traits>
 
-// ---------------------------------------------------------------------------
-// Generator configuration.
-// Deliberately narrow price range and small quantities: that makes the edge
-// cases (exact fills, several orders queued at one price, sweeps across levels)
-// happen constantly instead of once in a million events.
-// ---------------------------------------------------------------------------
+
 struct GenConfig {
-    Price    mid;                   // centre of generated prices; must sit well inside the book's band
-    Price    passive_depth    = 15; // resting orders land up to this many ticks behind mid
-    Price    aggressive_depth = 3;  // aggressive orders reach up to this many ticks through mid
-    Quantity max_quantity     = 10; // small on purpose: exact fills and ties become common
+    Price    mid;
+    Price    passive_depth    = 15; 
+    Price    aggressive_depth = 3;  
+    Quantity max_quantity     = 10; 
     int w_add = 50, w_cancel = 15, w_reduce = 10, w_execute = 10, w_replace = 15;
 };
 
-// ---------------------------------------------------------------------------
-// Produces one *valid* event at a time. Validity needs the current book state
-// (you can only cancel an order that exists, reduce by at most its remaining
-// quantity, ...), so the generator reads the reference book's snapshot rather
-// than tracking state itself. That way matching - which removes orders the
-// generator never explicitly cancelled - is accounted for automatically.
-// ---------------------------------------------------------------------------
 class Generator {
 public:
     Generator(uint64_t seed, const GenConfig& cfg) : rng_(seed), cfg_(cfg) {}
@@ -52,7 +40,7 @@ public:
 private:
     std::mt19937_64 rng_;
     GenConfig       cfg_;
-    OrderId         next_id_ = 1;   // ids are never reused
+    OrderId         next_id_ = 1;
 
     int64_t uniform(int64_t lo, int64_t hi) {
         return std::uniform_int_distribution<int64_t>(lo, hi)(rng_);
@@ -60,17 +48,12 @@ private:
 
     Add make_add() {
         Side  side = uniform(0, 1) ? Side::Buy : Side::Sell;
-        // negative offset = aggressive (reaches through mid, likely crosses)
-        // positive offset = passive (rests behind mid)
         Price off  = Price(uniform(-cfg_.aggressive_depth, cfg_.passive_depth));
         Price px   = side == Side::Buy ? cfg_.mid - off : cfg_.mid + off;
         return Add{.id = next_id_++, .price = px,
                    .quantity = Quantity(uniform(1, cfg_.max_quantity)), .side = side};
     }
 
-    // Replace never matches, so its new price must not cross the other side -
-    // a crossed book has no defined behaviour and the two books could
-    // legitimately disagree about it.
     Replace make_replace(const SnapEntry& t, Price best_bid, Price best_ask) {
         Price off = Price(uniform(0, cfg_.passive_depth));
         Price px  = t.side == Side::Buy ? cfg_.mid - off : cfg_.mid + off;
@@ -81,9 +64,6 @@ private:
     }
 };
 
-// ---------------------------------------------------------------------------
-// Dispatch one Event to a book. Works for any book with the common interface.
-// ---------------------------------------------------------------------------
 template <typename Book, typename Sink>
 void apply(Book& book, const Event& e, Sink& sink) {
     std::visit([&](const auto& ev) {

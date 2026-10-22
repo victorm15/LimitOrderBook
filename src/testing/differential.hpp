@@ -1,15 +1,6 @@
 #ifndef DIFFERENTIAL_H
 #define DIFFERENTIAL_H
 
-
-
-// Differential test: feed identical random streams to RefBook and a fast book,
-// compare everything observable after EVERY event, stop at the first divergence.
-//
-// usage: ./differential [n_seeds] [n_events_per_seed]
-//   start short (e.g. 2000 20) so failures come with short, readable histories,
-//   then go longer (e.g. 1000 5000) once short streams pass.
-
 #include "../books/ref_book.hpp"
 #include "../books/array_book.hpp"
 #include "../books/sorted_vec_book.hpp"
@@ -26,9 +17,7 @@
 #include <string>
 #include <vector>
 
-// ---------------------------------------------------------------------------
-// Failure reporting
-// ---------------------------------------------------------------------------
+
 static std::string entry_str(const Snapshot& s, size_t i) {
     if (i >= s.size()) return "-";
     const SnapEntry& e = s[i];
@@ -36,7 +25,6 @@ static std::string entry_str(const Snapshot& s, size_t i) {
            " id=" + std::to_string(e.id) + " q=" + std::to_string(e.quantity);
 }
 
-// Side-by-side, with '*' marking rows that differ.
 static void dump_diff(const Snapshot& ref, const Snapshot& fast) {
     std::printf("    %-34s | %s\n", "ref", "fast");
     for (size_t i = 0; i < std::max(ref.size(), fast.size()); ++i) {
@@ -53,10 +41,6 @@ static void dump_fills(const char* who, const std::vector<Fill>& fs) {
     std::printf("\n");
 }
 
-// ---------------------------------------------------------------------------
-// Everything we can observe about a book, compared against the reference.
-// Returns an empty string if they agree, otherwise a description.
-// ---------------------------------------------------------------------------
 template <typename Fast>
 static std::string compare(const RefBook& ref, const Fast& fast,
                            const Snapshot& sr, const Snapshot& sf,
@@ -83,9 +67,6 @@ static std::string compare(const RefBook& ref, const Fast& fast,
     return {};
 }
 
-// ---------------------------------------------------------------------------
-// One seed: generate n_events, apply to both books, compare after each.
-// ---------------------------------------------------------------------------
 template <typename Fast>
 static bool run_one(uint64_t seed, int n_events, const GenConfig& gc, Fast& fast) {
     RefBook   ref;
@@ -97,7 +78,6 @@ static bool run_one(uint64_t seed, int n_events, const GenConfig& gc, Fast& fast
     auto sink_r = [&](const Fill& f) { fr.push_back(f); };
     auto sink_f = [&](const Fill& f) { ff.push_back(f); };
 
-    // Every price the generator can produce, plus a margin.
     const Price lo = gc.mid - gc.passive_depth - gc.aggressive_depth - 2;
     const Price hi = gc.mid + gc.passive_depth + gc.aggressive_depth + 2;
 
@@ -110,8 +90,6 @@ static bool run_one(uint64_t seed, int n_events, const GenConfig& gc, Fast& fast
         apply(ref, e, sink_r);
         ref.snapshot(sr);
 
-        // A throw (e.g. .at() on a missing id) is a failure like any other,
-        // so report it with the history instead of dying without context.
         std::string why;
         try {
             apply(fast, e, sink_f);
@@ -140,8 +118,7 @@ static bool run_one(uint64_t seed, int n_events, const GenConfig& gc, Fast& fast
 }
 
 template <typename MakeBook>
-static bool run_book(const char* name, MakeBook make, const GenConfig& gc,
-                     int n_seeds, int n_events) {
+static bool run_book(const char* name, MakeBook make, const GenConfig& gc, int n_seeds, int n_events) {
     for (int s = 0; s < n_seeds; ++s) {
         auto fast = make();
         if (!run_one(uint64_t(s), n_events, gc, fast)) {
